@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{% static 'blog/content.css' %}?v=1.3">
+    <title>Keranjang Belanja - Threeofkind.supply</title>
+</head>
+<body>
+   <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="/">
+                    <img src="{% static 'blog/pict/logo.png'%}" class="logo-image"> 
+                </a>
+            </div>
+            
+            <nav class="nav">
+                <a href="/">Home</a>
+                <a href="/products/">Product</a>
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
+            </nav>
+            
+            <div class="header-right">
+                <a href="/cart/" class="cart-btn active">
+                    <i data-feather="shopping-cart"></i>
+                    <span class="cart-badge" id="cart-badge-header">0</span>
+                </a>
+                <a href="#wishlist" class="cart-btn" id="wishlist-btn">
+                    <i data-feather="heart"></i>
+                </a>
+                <a href="/payment/" class="cart-btn" id="payment-btn">
+                    <i data-feather="credit-card"></i>
+                </a>
+                <a href="/login/" class="cart-btn" id="user-btn">
+                    <i data-feather="user"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+    
+    <main class="main-content cart-page">
+        <div class="cart-container">
+            <div class="cart-header">
+                <h1>Keranjang Belanja</h1>
+            </div>
+
+            <div class="cart-content" id="cart-content">
+                </div>
+        </div>
+    </main>
+
+    {% include 'blog/footer.html' %}
+
+    <script src="{% static 'blog/lund.js' %}?v=1.2"></script>
+    <script>
+        // Script khusus untuk halaman cart
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCart();
+            feather.replace();
+        });
+    </script>
+</body>
+</html>

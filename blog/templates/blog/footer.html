@@ -1,0 +1,51 @@
+{% load static %}
+
+<footer class="footer">
+    <div class="footer-content">
+        
+        <div class="footer-column brand-info">
+            <img src="{% static 'blog/pict/logo.png'%}?v=1.2" class="footer-logo">
+            <p>Artistry in Every Detail. Aksesoris premium untuk gaya harianmu.</p>
+        </div>
+        
+        <div class="footer-column quick-links">
+            <h4>Toko</h4>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/products/">Produk</a></li>
+                <li><a href="#">Deals</a></li>
+                <li><a href="#">About</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-column help-links">
+            <h4>Bantuan</h4>
+            <ul>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">Cara Pemesanan</a></li>
+                <li><a href="#">Kebijakan Privasi</a></li>
+                <li><a href="#">Syarat & Ketentuan</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-column contact">
+            <h4>Hubungi Kami</h4>
+            <p><i data-feather="mail"></i> support@threeofkind.id</p>
+            <p><i data-feather="phone"></i> +62 812 3456 7890</p>
+            <div class="social-icons">
+                <a href="#"><i data-feather="instagram"></i></a>
+                <a href="#"><i data-feather="facebook"></i></a>
+                <a href="#"><i data-feather="twitter"></i></a>
+                <a href="#"><i data-feather="youtube"></i></a>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="footer-bottom">
+        <p>&copy; {% now "Y" %} Threeofkind.supply. All rights reserved.</p>
+        <div class="payment-icons">
+            <span>BCA</span> | <span>Mandiri</span> | <span>GoPay</span> | <span>OVO</span>
+        </div>
+    </div>
+</footer>

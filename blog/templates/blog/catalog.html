@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-AR">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{% static 'blog/content.css' %}?v=1.3">
+    <title>Threeofkind.supply</title>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="/">
+                    <img src="{% static 'blog/pict/logo.png'%}" class="logo-image">
+                </a>
+            </div>
+            
+            <nav class="nav">
+                <a href="/" class="active">Home</a>
+                <a href="/products/">Product</a>
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
+            </nav>
+            
+            <div class="header-right">
+                <a href="/cart/" class="cart-btn">
+                    <i data-feather="shopping-cart"></i>
+                    <span class="cart-badge" id="cart-badge-header">0</span> 
+                </a>
+                <a href="#wishlist" class="cart-btn" id="wishlist-btn">
+                    <i data-feather="heart"></i>
+                </a>
+                <a href="/payment/" class="cart-btn" id="payment-btn">
+                    <i data-feather="credit-card"></i>
+                </a>
+                <a href="/login/" class="cart-btn" id="user-btn">
+                    <i data-feather="user"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Welcome to <span class="brand-highlight">Threeofkind.supply</span></h1>
+                <p class="hero-subtitle">Artistry in Every Detail.</p>
+                <p class="hero-description">
+                    Jelajahi koleksi gelang dan kalung premium kami, 
+                    yang dirancang untuk bikin gaya harianmu makin on point.
+                     Temukan perpaduan tren kekinian dan gaya klasik yang elegan di sini.
+                </p>
+                </div>
+            <div class="hero-image">
+        </div>
+    </section>
+
+    <section class="about-section">
+        <div class="about-content">
+            <h2>About Threeofkind.supply</h2>
+            <p>
+                Kenapa kami ada? Sederhana. Kamu capek cari aksesoris bagus yang nggak pasaran dan kualitasnya oke.
+                 Jadi, di tahun 2025 ini, kami putuskan buat bikin Threeofkind.supply.
+                  Kami menghadirkan gelang dan kalung untuk memastikan kamu cuma dapat yang terbaik desain keren, bahan awet, 
+                  dan pastinya, bikin kamu makin percaya diri.
+            </p>
+        </div>
+    </section>
+
+    <div class="main-content">
+        
+        <main class="content">
+            <div class="content-header">
+                <h2>Products (4)</h2>
+                
+                <div class="view-controls">
+                    <div class="view-toggle">
+                        <button class="view-btn active">
+                            <i data-feather="grid"></i>
+                        </button>
+                        <button class="view-btn">
+                            <i data-feather="list"></i>
+                        </button>
+                    </div>
+                    
+                    <select class="sort-select">
+                        <option>Sort by: Relevance</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Newest</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="products-grid">
+                <div class="product-card" data-product-id="1" onclick="openProductModal('1')" style="cursor: pointer;">
+                    <div class="product-image">
+                        <img src="{% static 'blog/pict/bracelet 1.jpg'%}" alt="Gelang Titanium Steel Anti Karat" />
+                        <span class="product-badge badge-discount">-20%</span>
+                        <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite(this);">
+                            <i data-feather="heart"></i>
+                        </button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">Gelang Titanium Steel Anti Karat Klavikula Multi Layers Hias Permata Hitam Unisex adjustable Anti Karat</h3>
+                        <div class="product-rating">
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">IDR 35.000</span>
+                            <span class="original-price">IDR 60.000</span>
+                        </div>
+                        <div class="stock-info">
+                            <span class="stock-count">8 in stock</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product-id="2" onclick="openProductModal('2')" style="cursor: pointer;">
+                    <div class="product-image">
+                        <img src="{% static 'blog/pict/bracelet 2.jpg'%}" alt= "Gelang Aesthetic Korean Style" />
+                        <span class="product-badge badge-new">NEW</span>
+                        <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite(this);">
+                            <i data-feather="heart"></i>
+                        </button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">Gelang Aesthetic Korean Style Unisex Stylish pria wanita titanium style anti karat</h3>
+                        <div class="product-rating">
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">IDR 30.000</span>
+                        </div>
+                        <div class="stock-info">
+                            <span class="stock-count">7 in stock</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product-id="3" onclick="openProductModal('3')" style="cursor: pointer;">
+                    <div class="product-image">
+                        <img src="{% static 'blog/pict/necklace 1.jpg'%}" alt="Kalung Fashion Wanita" />
+                        <span class="product-badge badge-discount">-15%</span>
+                        <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite(this);">
+                            <i data-feather="heart"></i>
+                        </button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">Kalung Titanium Star boy Kalung Liontin Bintang Stainless Steel Anti Karat Terbaru Pria Dan Wanita</h3>
+                        <div class="product-rating">
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">IDR 45.000</span>
+                            <span class="original-price">IDR 55.000</span>
+                        </div>
+                        <div class="stock-info">
+                            <span class="stock-count">7 in stock</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-product-id="4" onclick="openProductModal('4')" style="cursor: pointer;">
+                    <div class="product-image">
+                        <img src="{% static 'blog/pict/necklace 2.jpg'%}" alt="Kalung Fashion Premium" />
+                        <span class="product-badge badge-discount">-26%</span>
+                        <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite(this);">
+                            <i data-feather="heart"></i>
+                        </button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">Kalung Titanium Rantai Rolo Liontin Bulan Bintang Anti Karat dan Anti Luntur untuk Pria dan Wanita</h3>
+                        <div class="product-rating">
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">IDR 40.000</span>
+                            <span class="original-price">IDR 70.000</span>
+                        </div>
+                        <div class="stock-info">
+                            <span class="stock-count low-stock">3 in stock</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="productModal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">
+                <i data-feather="x"></i>
+            </button>
+            
+            <div class="modal-body">
+                <div class="modal-image">
+                    <img id="modalImage" src="" alt="" />
+                </div>
+                
+                <div class="modal-info">
+                    <h2 id="modalTitle"></h2>
+                    <div class="modal-rating">
+                        <div class="stars" id="modalStars"></div>
+                        <span id="modalRatingCount"></span>
+                    </div>
+                    
+                    <div class="modal-price">
+                        <span class="current-price" id="modalCurrentPrice"></span>
+                        <span class="original-price" id="modalOriginalPrice"></span>
+                    </div>
+                    
+                    <div class="modal-stock">
+                        <span class="stock-status" id="modalStock"></span>
+                    </div>
+                    
+                    <div class="modal-description">
+                        <h4>Description</h4>
+                        <p id="modalDescription"></p>
+                    </div>
+                    
+                    <div class="modal-features">
+                        <h4>Features</h4>
+                        <ul id="modalFeatures"></ul>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <div class="quantity-selector">
+                            <button onclick="decreaseQuantity()">-</button>
+                            <input type="number" id="quantityInput" value="1" min="1" max="10" />
+                            <button onclick="increaseQuantity()">+</button>
+                        </div>
+                        
+                        <button class="add-to-cart-btn" onclick="addToCartFromModal()">
+                            <i data-feather="shopping-cart"></i>
+                            Add to Cart
+                        </button>
+                        
+                        <button class="buy-now-btn" onclick="buyNowFromModal()">
+                            <i data-feather="credit-card"></i>
+                            Buy Now
+                        </button>
+                        
+                        <button class="favorite-modal-btn" onclick="toggleFavoriteModal()">
+                            <i data-feather="heart"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'blog/footer.html' %}
+
+    <script src="{% static 'blog/lund.js' %}?v=1.3"></script>
+</body>
+</html>
