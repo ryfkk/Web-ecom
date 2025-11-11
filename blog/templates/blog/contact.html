@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{% static 'blog/content.css' %}?v=1.5">
+    <title>Contact - Threeofkind.supply</title>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="/">
+                    <img src="{% static 'blog/pict/logo.png'%}?v=1.4" class="logo-image">
+                </a>
+            </div>
+            
+            <nav class="nav">
+                <a href="/">Home</a>
+                <a href="/products/">Product</a>
+                <a href="/about/">About Us</a>
+                <a href="/contact/" class="active">Contact</a> </nav>
+            
+            <div class="header-right">
+                </div>
+        </div>
+    </header>
+
+    <main class="main-content" style="padding: 4rem 2rem; min-height: 60vh;">
+        <div style="max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; color: #1e293b;">
+            <h1>Contact Us</h1>
+            <p>Silakan hubungi kami melalui email di support@threeofkind.id.</p>
+        </div>
+    </main>
+
+    {% include 'blog/footer.html' %}
+
+    <script src="{% static 'blog/lund.js' %}?v=1.5"></script>
+</body>
+</html>

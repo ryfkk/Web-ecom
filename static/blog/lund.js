@@ -1,11 +1,16 @@
 // Initialize all functionality when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM Loaded. Memulai script...");
-    feather.replace();
+    console.log("=== DOM Loaded ===");
     
-    console.log("Mencoba memuat keranjang (cart) dari storage...");
+    // Initialize Feather Icons
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+        console.log('✓ Feather icons initialized');
+    }
+    
+    console.log("Loading cart from localStorage...");
     loadCartFromStorage();
-    console.log("Keranjang berhasil dimuat:", cart); 
+    console.log("Cart loaded:", cart); 
     
     // Initialize all functions
     initializeSearch();
@@ -13,14 +18,13 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeFavorites();
     initializeProductCards();
     initializePaymentForm();
+    initializeModalTabs();
     
-    console.log("Menjalankan renderCart() (untuk /cart)");
     renderCart();
-    console.log("Menjalankan renderPaymentSummary() (untuk /payment)");
     renderPaymentSummary(); 
     
     updateCartBadge();
-    console.log('EliteStore initialized successfully!');
+    console.log('=== Initialization complete ===');
 });
 
 // Cart functionality with localStorage
@@ -149,7 +153,7 @@ function removeFromCart(cartItemId) {
     cart = cart.filter(item => item.id !== cartItemId);
     saveCartToStorage();
     updateCartBadge();
-    renderCart(); // Re-render halaman cart
+    renderCart();
     showNotification('Produk dihapus dari keranjang');
 }
 
@@ -159,7 +163,7 @@ function updateQuantity(cartItemId, newQuantity) {
     if (item && newQuantity > 0) {
         item.quantity = newQuantity;
         saveCartToStorage();
-        renderCart(); // Re-render halaman cart
+        renderCart();
     } else if (item && newQuantity <= 0) {
         removeFromCart(cartItemId);
     }
@@ -185,15 +189,13 @@ function updateCartBadge() {
 // Render cart page
 function renderCart() {
     const cartContent = document.getElementById('cart-content');
-    if (!cartContent) {
-        return; 
-    }
+    if (!cartContent) return;
 
     if (cart.length === 0) {
         cartContent.innerHTML = `
             <div class="cart-items">
                 <div class="empty-cart">
-                    <i data-feather="shopping-cart"></i>
+                    <i data-feather="shopping-cart" style="width: 100px; height: 100px;"></i>
                     <h3>Keranjang Anda Kosong</h3>
                     <p>Sepertinya Anda belum menambahkan produk ke keranjang</p>
                     <button class="btn btn-primary" onclick="window.location.href='/products/'">
@@ -229,7 +231,7 @@ function renderCart() {
                 </div>
             </div>
             <div class="cart-item-actions">
-                <p style="font-size: 1.25rem; font-weight: bold; color: #1e293b;">
+                <p style="font-size: 1.35rem; font-weight: bold; color: #ef4444;">
                     ${formatCurrency(item.price * item.quantity)}
                 </p>
                 <button class="remove-btn" onclick="removeFromCart(${item.id})">
@@ -290,40 +292,40 @@ function renderCart() {
     feather.replace();
 }
 
-// Proceed to checkout
+// ========================================
+// PROCEED TO CHECKOUT - SIMPLE VERSION (NO SYNC)
+// ========================================
 function proceedToCheckout() {
+    console.log('[CHECKOUT] Starting simple checkout...');
+    
     if (cart.length === 0) {
-        showNotification('Keranjang Anda kosong');
+        alert('Keranjang Anda kosong!');
         return;
     }
+    
+    console.log('[CHECKOUT] Cart:', cart);
+    console.log('[CHECKOUT] Redirecting to /payment/...');
+    
+    // LANGSUNG REDIRECT TANPA SYNC!
     window.location.href = '/payment/';
 }
 
-// Clear cart
-function clearCart() {
-    if (confirm('Yakin ingin mengosongkan keranjang?')) {
-        cart = [];
-        saveCartToStorage();
-        renderCart();
-        showNotification('Keranjang dikosongkan');
-    }
-}
-
-// Show notification (simple toast)
+// Show notification
 function showNotification(message) {
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
         top: 100px;
         right: 20px;
-        background: #10b981;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 14px 24px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
         z-index: 10000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        font-weight: 500;
     `;
     notification.textContent = message;
     
@@ -334,12 +336,12 @@ function showNotification(message) {
     }, 100);
     
     setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
+        notification.style.transform = 'translateX(120%)';
         setTimeout(() => {
             if (document.body.contains(notification)) {
                 document.body.removeChild(notification);
             }
-        }, 300);
+        }, 400);
     }, 3000);
 }
 
@@ -348,12 +350,10 @@ function initializeProductCards() {
     const productCards = document.querySelectorAll('.product-card');
     if (productCards.length === 0) return;
 
-    console.log('Initializing product cards...');
     productCards.forEach(card => {
         card.addEventListener('click', function(e) {
             if (!e.target.closest('.favorite-btn')) {
                 const productId = this.getAttribute('data-product-id');
-                console.log('Product clicked:', productId);
                 openProductModal(productId);
             }
         });
@@ -362,21 +362,13 @@ function initializeProductCards() {
 
 // Open product modal
 function openProductModal(productId) {
-    console.log('Opening modal for product:', productId);
     const product = productsData[productId];
-    if (!product) {
-        console.error('Product not found:', productId);
-        return;
-    }
+    if (!product) return;
 
-    const cardImageSrc = document.querySelector(`.product-card[data-product-id="${productId}"] .product-image img`).src;
-    
-    document.getElementById('modalImage').src = cardImageSrc; 
+    document.getElementById('modalImage').src = product.image; 
     document.getElementById('modalImage').alt = product.name;
     document.getElementById('modalTitle').textContent = product.name;
     document.getElementById('modalCurrentPrice').textContent = product.priceFormatted;
-    document.getElementById('modalRatingCount').textContent = product.ratingCount || "";
-    document.getElementById('modalDescription').textContent = product.description;
 
     const originalPriceEl = document.getElementById('modalOriginalPrice');
     if (product.originalPrice) {
@@ -384,21 +376,6 @@ function openProductModal(productId) {
         originalPriceEl.style.display = 'inline';
     } else {
         originalPriceEl.style.display = 'none';
-    }
-
-    const starsContainer = document.getElementById('modalStars');
-    starsContainer.innerHTML = '';
-    const rating = product.rating || 0; 
-    for (let i = 1; i <= 5; i++) {
-        const star = document.createElement('span');
-        star.className = i <= rating ? 'star' : 'star empty';
-        star.textContent = '★';
-        starsContainer.appendChild(star);
-    }
-    if (rating === 0) {
-        starsContainer.style.display = 'none';
-    } else {
-        starsContainer.style.display = 'flex';
     }
 
     const stockEl = document.getElementById('modalStock');
@@ -416,6 +393,8 @@ function openProductModal(productId) {
     stockEl.className = `stock-status ${stockClass}`;
     stockEl.textContent = stockText;
 
+    document.getElementById('modalDescription').textContent = product.description;
+
     const featuresContainer = document.getElementById('modalFeatures');
     featuresContainer.innerHTML = '';
     if(product.features && product.features.length > 0) {
@@ -424,9 +403,6 @@ function openProductModal(productId) {
             li.textContent = feature;
             featuresContainer.appendChild(li);
         });
-        featuresContainer.parentElement.style.display = 'block';
-    } else {
-        featuresContainer.parentElement.style.display = 'none';
     }
 
     const quantityInput = document.getElementById('quantityInput');
@@ -502,7 +478,7 @@ function buyNowFromModal() {
         
         setTimeout(() => {
             closeModal();
-            window.location.href = '/payment/';
+            proceedToCheckout();
         }, 1000);
     }
 }
@@ -538,22 +514,6 @@ function initializeSearch() {
                 product.style.display = 'none';
             }
         });
-    });
-}
-
-// ===== FUNGSI FILTER DIHAPUS DARI SINI =====
-// initializeCategoryFilters() DIHAPUS
-// filterProductsByCategory() DIHAPUS
-// initializePriceRange() DIHAPUS
-
-// Sort functionality
-function initializeSort() {
-    const sortSelect = document.querySelector('.sort-select');
-    if (!sortSelect) return;
-
-    sortSelect.addEventListener('change', function(e) {
-        const sortBy = e.target.value;
-        console.log('Sort by:', sortBy);
     });
 }
 
@@ -612,12 +572,14 @@ function initializePaymentForm() {
     const ccDetails = document.getElementById('creditCardDetails');
     const vaDetails = document.getElementById('bankTransferDetails');
     const ewDetails = document.getElementById('eWalletDetails');
+    const qrisDetails = document.getElementById('qrisDetails');
 
     paymentOptions.forEach(option => {
         option.addEventListener('change', function() {
             if(ccDetails) ccDetails.style.display = 'none';
             if(vaDetails) vaDetails.style.display = 'none';
             if(ewDetails) ewDetails.style.display = 'none';
+            if(qrisDetails) qrisDetails.style.display = 'none';
 
             if (this.value === 'credit_card') {
                 if(ccDetails) ccDetails.style.display = 'block';
@@ -625,14 +587,11 @@ function initializePaymentForm() {
                 if(vaDetails) vaDetails.style.display = 'block';
             } else if (this.value === 'e_wallet') {
                 if(ewDetails) ewDetails.style.display = 'block';
+            } else if (this.value === 'qris') {
+                if(qrisDetails) qrisDetails.style.display = 'block';
             }
         });
     });
-}
-
-// Cart management functions
-function viewCart() {
-    window.location.href = '/cart/';
 }
 
 // Simple toggle favorite function
@@ -648,17 +607,15 @@ function toggleFavorite(btn) {
     }
 }
 
-// ===== FUNGSI BARU UNTUK HALAMAN PAYMENT =====
+// Render payment summary
 function renderPaymentSummary() {
     const itemsContainer = document.getElementById('payment-summary-items');
     const totalContainer = document.getElementById('payment-summary-total');
 
-    if (!itemsContainer || !totalContainer) {
-        return; 
-    }
+    if (!itemsContainer || !totalContainer) return;
 
     if (cart.length === 0) {
-        itemsContainer.innerHTML = "<p>Keranjang Anda kosong.</p>";
+        itemsContainer.innerHTML = "<p style='text-align: center; color: #64748b;'>Keranjang Anda kosong.</p>";
         totalContainer.innerHTML = `
             <div class="total-row total-row-final">
                 <strong>Total Pembayaran</strong>
@@ -669,7 +626,9 @@ function renderPaymentSummary() {
         if(payButton) {
             payButton.disabled = true;
             payButton.style.opacity = '0.5';
-            payButton.innerHTML = "Keranjang Kosong";
+            payButton.style.cursor = 'not-allowed';
+            payButton.innerHTML = "<i data-feather='alert-circle'></i> Keranjang Kosong";
+            feather.replace();
         }
         return;
     }
@@ -706,4 +665,26 @@ function renderPaymentSummary() {
         </div>
     `;
     totalContainer.innerHTML = totalHTML;
+}
+
+// Initialize modal tabs
+function initializeModalTabs() {
+    const modal = document.getElementById('productModal');
+    if (!modal) return;
+
+    const tabButtons = modal.querySelectorAll('.modal-tab-btn');
+    const tabContents = modal.querySelectorAll('.modal-tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            button.classList.add('active');
+            const tabId = button.getAttribute('data-tab');
+            const activeContent = modal.querySelector(`#tab-${tabId}`);
+            if (activeContent) {
+                activeContent.classList.add('active');
+            }
+        });
+    });
 }

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/feather-icons"></script>
-    <link rel="stylesheet" href="{% static 'blog/content.css' %}?v=1.3">
+    <link rel="stylesheet" href="{% static 'blog/content.css' %}?v=2.0">
     <title>Checkout - Threeofkind.supply</title>
 </head>
 <body>
@@ -13,11 +13,14 @@
         <div class="header-content">
             <div class="logo">
                 <a href="/">
-                    <img src="{% static 'blog/pict/logo.png'%}" class="logo-image">
+                    <img src="{% static 'blog/pict/logo.png'%}?v=2.0" class="logo-image">
                 </a>
             </div>
             <nav class="nav">
-                <a href="/">Kembali ke Toko</a>
+                <a href="/">
+                    <i data-feather="arrow-left"></i>
+                    Kembali ke Toko
+                </a>
             </nav>
             <div class="header-right">
                 <span class="secure-checkout">
@@ -32,14 +35,17 @@
         <div class="checkout-container">
             
             <div class="checkout-details">
-                <form id="checkout-form" action="/proses-pembayaran" method="POST">
+                <form id="checkout-form" action="/proses-pembayaran/" method="POST">
                     {% csrf_token %}
                     
+                    <!-- Hidden input untuk cart data -->
+                    <input type="hidden" name="cart_data" id="cart-data-input" value="">
+                    
                     <section class="checkout-section">
-                        <h2>Alamat Pengiriman</h2>
+                        <h2><i data-feather="map-pin" style="width: 24px; height: 24px; margin-right: 8px;"></i>Alamat Pengiriman</h2>
                         <div class="form-group">
                             <label for="full-name">Nama Lengkap</label>
-                            <input type="text" id="full-name" name="full_name" class="form-input" required>
+                            <input type="text" id="full-name" name="full_name" class="form-input" placeholder="Nama lengkap Anda" required>
                         </div>
                         <div class="form-group">
                             <label for="address">Alamat Lengkap</label>
@@ -48,62 +54,184 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="city">Kota</label>
-                                <input type="text" id="city" name="city" class="form-input" required>
+                                <input type="text" id="city" name="city" class="form-input" placeholder="Surabaya" required>
                             </div>
                             <div class="form-group">
                                 <label for="postal-code">Kode Pos</label>
-                                <input type="text" id="postal-code" name="postal_code" class="form-input" required>
+                                <input type="text" id="postal-code" name="postal_code" class="form-input" placeholder="60123" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="phone">Nomor Telepon</label>
-                            <input type="tel" id="phone" name="phone" class="form-input" placeholder="0812..." required>
+                            <input type="tel" id="phone" name="phone" class="form-input" placeholder="0812-3456-7890" required>
                         </div>
                     </section>
                     
                     <section class="checkout-section">
-                        <h2>Metode Pembayaran</h2>
+                        <h2><i data-feather="credit-card" style="width: 24px; height: 24px; margin-right: 8px;"></i>Metode Pembayaran</h2>
                         <div class="payment-options">
                             <label class="payment-option">
                                 <input type="radio" name="payment_method" value="credit_card" checked>
                                 <i data-feather="credit-card"></i>
                                 <span>Kartu Kredit/Debit</span>
                             </label>
+                            
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="qris">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="8" height="8" rx="1"/>
+                                    <rect x="13" y="3" width="8" height="8" rx="1"/>
+                                    <rect x="3" y="13" width="8" height="8" rx="1"/>
+                                    <rect x="13" y="13" width="8" height="8" rx="1"/>
+                                    <circle cx="7" cy="7" r="1" fill="currentColor"/>
+                                    <circle cx="17" cy="7" r="1" fill="currentColor"/>
+                                    <circle cx="7" cy="17" r="1" fill="currentColor"/>
+                                    <circle cx="17" cy="17" r="1" fill="currentColor"/>
+                                </svg>
+                                <span>QRIS (Semua E-Wallet)</span>
+                            </label>
+                            
                             <label class="payment-option">
                                 <input type="radio" name="payment_method" value="bank_transfer">
                                 <i data-feather="dollar-sign"></i>
-                                <span>Transfer Bank (VA)</span>
+                                <span>Transfer Bank (Virtual Account)</span>
                             </label>
+                            
                             <label class="payment-option">
                                 <input type="radio" name="payment_method" value="e_wallet">
                                 <i data-feather="smartphone"></i>
-                                <span>E-Wallet (OVO/GoPay)</span>
+                                <span>E-Wallet (OVO/GoPay/Dana)</span>
                             </label>
                         </div>
                         
+                        <!-- Credit Card Details -->
                         <div id="creditCardDetails" class="payment-details">
                             <div class="form-group">
                                 <label for="card-number">Nomor Kartu</label>
-                                <input type="text" id="card-number" class="form-input" placeholder="1234 5678 9012 3456">
+                                <input type="text" id="card-number" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19">
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="expiry-date">Expired (MM/YY)</label>
-                                    <input type="text" id="expiry-date" class="form-input" placeholder="MM / YY">
+                                    <input type="text" id="expiry-date" class="form-input" placeholder="MM / YY" maxlength="5">
                                 </div>
                                 <div class="form-group">
                                     <label for="cvv">CVV</label>
-                                    <input type="text" id="cvv" class="form-input" placeholder="123">
+                                    <input type="text" id="cvv" class="form-input" placeholder="123" maxlength="3">
+                                </div>
+                            </div>
+                            <p style="color: #64748b; font-size: 0.85rem; margin-top: 0.5rem;">
+                                <i data-feather="shield" style="width: 14px; height: 14px;"></i>
+                                Data kartu Anda dienkripsi dengan aman
+                            </p>
+                        </div>
+
+                        <!-- QRIS Details -->
+                        <div id="qrisDetails" class="payment-details" style="display: none;">
+                            <div class="qris-container">
+                                <div class="qris-code">
+                                    <svg width="220" height="220" viewBox="0 0 100 100" style="border: 2px solid #e2e8f0; border-radius: 8px;">
+                                        <!-- QR Code Pattern Simulation -->
+                                        <rect x="10" y="10" width="15" height="15" fill="#000"/>
+                                        <rect x="75" y="10" width="15" height="15" fill="#000"/>
+                                        <rect x="10" y="75" width="15" height="15" fill="#000"/>
+                                        <rect x="12" y="12" width="11" height="11" fill="#fff"/>
+                                        <rect x="77" y="12" width="11" height="11" fill="#fff"/>
+                                        <rect x="12" y="77" width="11" height="11" fill="#fff"/>
+                                        <rect x="15" y="15" width="5" height="5" fill="#000"/>
+                                        <rect x="80" y="15" width="5" height="5" fill="#000"/>
+                                        <rect x="15" y="80" width="5" height="5" fill="#000"/>
+                                        <!-- Random pattern -->
+                                        <rect x="30" y="15" width="3" height="3" fill="#000"/>
+                                        <rect x="35" y="15" width="3" height="3" fill="#000"/>
+                                        <rect x="45" y="18" width="3" height="3" fill="#000"/>
+                                        <rect x="52" y="15" width="3" height="3" fill="#000"/>
+                                        <rect x="60" y="18" width="3" height="3" fill="#000"/>
+                                        <rect x="15" y="35" width="3" height="3" fill="#000"/>
+                                        <rect x="20" y="40" width="3" height="3" fill="#000"/>
+                                        <rect x="32" y="38" width="3" height="3" fill="#000"/>
+                                        <rect x="40" y="35" width="3" height="3" fill="#000"/>
+                                        <rect x="48" y="42" width="3" height="3" fill="#000"/>
+                                        <rect x="55" y="38" width="3" height="3" fill="#000"/>
+                                        <rect x="62" y="35" width="3" height="3" fill="#000"/>
+                                        <rect x="75" y="40" width="3" height="3" fill="#000"/>
+                                        <rect x="80" y="35" width="3" height="3" fill="#000"/>
+                                        <rect x="15" y="50" width="3" height="3" fill="#000"/>
+                                        <rect x="25" y="55" width="3" height="3" fill="#000"/>
+                                        <rect x="35" y="52" width="3" height="3" fill="#000"/>
+                                        <rect x="45" y="58" width="3" height="3" fill="#000"/>
+                                        <rect x="55" y="55" width="3" height="3" fill="#000"/>
+                                        <rect x="65" y="52" width="3" height="3" fill="#000"/>
+                                        <rect x="75" y="58" width="3" height="3" fill="#000"/>
+                                        <rect x="85" y="55" width="3" height="3" fill="#000"/>
+                                        <rect x="30" y="75" width="3" height="3" fill="#000"/>
+                                        <rect x="40" y="78" width="3" height="3" fill="#000"/>
+                                        <rect x="50" y="75" width="3" height="3" fill="#000"/>
+                                        <rect x="60" y="78" width="3" height="3" fill="#000"/>
+                                        <rect x="75" y="75" width="3" height="3" fill="#000"/>
+                                        <rect x="82" y="82" width="3" height="3" fill="#000"/>
+                                        <text x="50" y="50" font-size="8" text-anchor="middle" fill="#ef4444" font-weight="bold">QRIS</text>
+                                    </svg>
+                                </div>
+                                <div class="qris-info">
+                                    <p style="font-weight: 600; color: #1e293b; margin-bottom: 0.75rem;">
+                                        <i data-feather="smartphone" style="width: 18px; height: 18px;"></i>
+                                        Cara Pembayaran:
+                                    </p>
+                                    <ol style="text-align: left; padding-left: 1.5rem; color: #64748b; font-size: 0.9rem; line-height: 1.8;">
+                                        <li>Buka aplikasi e-wallet (GoPay, OVO, Dana, LinkAja, dll)</li>
+                                        <li>Pilih menu "Scan QR" atau "Bayar"</li>
+                                        <li>Scan kode QR di atas</li>
+                                        <li>Konfirmasi pembayaran di aplikasi Anda</li>
+                                    </ol>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Bank Transfer Details -->
                         <div id="bankTransferDetails" class="payment-details" style="display: none;">
-                            <p>Anda akan menerima Nomor Virtual Account di halaman selanjutnya.</p>
+                            <p style="color: #64748b; margin-bottom: 1rem;">
+                                <i data-feather="info" style="width: 18px; height: 18px;"></i>
+                                Anda akan menerima Nomor Virtual Account di halaman konfirmasi.
+                            </p>
+                            <p style="color: #64748b; font-size: 0.9rem;">Pilih bank:</p>
+                            <div style="display: grid; gap: 0.75rem; margin-top: 0.75rem;">
+                                <label style="display: flex; align-items: center; gap: 10px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="bank_choice" value="bca" style="width: 18px; height: 18px;">
+                                    <span style="font-weight: 500;">BCA Virtual Account</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 10px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="bank_choice" value="mandiri" style="width: 18px; height: 18px;">
+                                    <span style="font-weight: 500;">Mandiri Virtual Account</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 10px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="bank_choice" value="bni" style="width: 18px; height: 18px;">
+                                    <span style="font-weight: 500;">BNI Virtual Account</span>
+                                </label>
+                            </div>
                         </div>
 
+                        <!-- E-Wallet Details -->
                         <div id="eWalletDetails" class="payment-details" style="display: none;">
-                            <p>Instruksi pembayaran akan muncul di aplikasi OVO/GoPay Anda.</p>
+                            <p style="color: #64748b; margin-bottom: 1rem;">
+                                <i data-feather="smartphone" style="width: 18px; height: 18px;"></i>
+                                Instruksi pembayaran akan muncul di aplikasi yang Anda pilih.
+                            </p>
+                            <p style="color: #64748b; font-size: 0.9rem;">Pilih e-wallet:</p>
+                            <div style="display: grid; gap: 0.75rem; margin-top: 0.75rem;">
+                                <label style="display: flex; align-items: center; gap: 10px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="ewallet_choice" value="gopay" style="width: 18px; height: 18px;">
+                                    <span style="font-weight: 500;">GoPay</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 10px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="ewallet_choice" value="ovo" style="width: 18px; height: 18px;">
+                                    <span style="font-weight: 500;">OVO</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 10px; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
+                                    <input type="radio" name="ewallet_choice" value="dana" style="width: 18px; height: 18px;">
+                                    <span style="font-weight: 500;">DANA</span>
+                                </label>
+                            </div>
                         </div>
                     </section>
                     
@@ -114,15 +242,25 @@
                 <h2>Ringkasan Pesanan</h2>
                 
                 <div class="summary-item-list" id="payment-summary-items">
-                    </div>
+                    <p style="text-align: center; color: #64748b;">Memuat keranjang...</p>
+                </div>
                 
                 <div class="summary-total" id="payment-summary-total">
+                    <div class="total-row total-row-final">
+                        <strong>Total Pembayaran</strong>
+                        <strong>IDR 0</strong>
                     </div>
+                </div>
                 
                 <button type="submit" form="checkout-form" class="btn btn-primary btn-full">
                     <i data-feather="check-circle"></i>
                     Bayar Sekarang
                 </button>
+                
+                <p style="text-align: center; color: #64748b; font-size: 0.85rem; margin-top: 1rem;">
+                    <i data-feather="shield" style="width: 14px; height: 14px;"></i>
+                    Pembayaran Anda dilindungi dengan enkripsi SSL
+                </p>
             </aside>
 
         </div>
@@ -130,6 +268,129 @@
 
     {% include 'blog/footer.html' %}
 
-    <script src="{% static 'blog/lund.js' %}?v=1.2"></script>
-    </body>
+    <script src="{% static 'blog/lund.js' %}?v=2.0"></script>
+    
+    <!-- SCRIPT UNTUK LOAD CART - INI YANG PENTING! -->
+    <script>
+        console.log('[PAYMENT PAGE] Loading cart from localStorage...');
+        
+        // Baca cart dari localStorage
+        const cart = JSON.parse(localStorage.getItem('threeofkind_cart')) || [];
+        console.log('[PAYMENT PAGE] Cart loaded:', cart);
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return 'IDR ' + amount.toLocaleString('id-ID');
+        }
+        
+        // Render payment summary
+        function renderPaymentSummary() {
+            const itemsContainer = document.getElementById('payment-summary-items');
+            const totalContainer = document.getElementById('payment-summary-total');
+            
+            if (!itemsContainer || !totalContainer) {
+                console.error('[PAYMENT PAGE] Containers not found!');
+                return;
+            }
+            
+            if (cart.length === 0) {
+                itemsContainer.innerHTML = "<p style='text-align: center; color: #64748b;'>Keranjang Anda kosong.</p>";
+                totalContainer.innerHTML = `
+                    <div class="total-row total-row-final">
+                        <strong>Total Pembayaran</strong>
+                        <strong>${formatCurrency(0)}</strong>
+                    </div>
+                `;
+                
+                const payButton = document.querySelector('button[form="checkout-form"]');
+                if (payButton) {
+                    payButton.disabled = true;
+                    payButton.style.opacity = '0.5';
+                    payButton.style.cursor = 'not-allowed';
+                }
+                return;
+            }
+            
+            // Render cart items
+            let itemsHTML = '';
+            let subtotal = 0;
+            
+            cart.forEach(item => {
+                const itemSubtotal = item.price * item.quantity;
+                subtotal += itemSubtotal;
+                
+                itemsHTML += `
+                    <div class="summary-item" style="display: flex; gap: 12px; padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                        <img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; color: #1e293b; margin-bottom: 4px;">${item.name}</div>
+                            <div style="color: #64748b; font-size: 0.9rem;">Qty: ${item.quantity}</div>
+                        </div>
+                        <div style="font-weight: 600; color: #ef4444;">${formatCurrency(itemSubtotal)}</div>
+                    </div>
+                `;
+            });
+            
+            itemsContainer.innerHTML = itemsHTML;
+            
+            const shipping = 10000;
+            const total = subtotal + shipping;
+            
+            totalContainer.innerHTML = `
+                <div class="total-row" style="display: flex; justify-content: space-between; padding: 10px 0;">
+                    <span>Subtotal</span>
+                    <span>${formatCurrency(subtotal)}</span>
+                </div>
+                <div class="total-row" style="display: flex; justify-content: space-between; padding: 10px 0;">
+                    <span>Pengiriman</span>
+                    <span>${formatCurrency(shipping)}</span>
+                </div>
+                <div class="total-row total-row-final" style="display: flex; justify-content: space-between; padding: 15px 0; border-top: 2px solid #e2e8f0; margin-top: 10px;">
+                    <strong>Total Pembayaran</strong>
+                    <strong style="color: #ef4444; font-size: 1.25rem;">${formatCurrency(total)}</strong>
+                </div>
+            `;
+            
+            console.log('[PAYMENT PAGE] Summary rendered. Total:', total);
+        }
+        
+        // Prepare cart data untuk form submission
+        function prepareCartData() {
+            const cartData = {};
+            cart.forEach(item => {
+                cartData[item.productId] = {
+                    'quantity': item.quantity
+                };
+            });
+            
+            // Set hidden input value
+            const cartInput = document.getElementById('cart-data-input');
+            if (cartInput) {
+                cartInput.value = JSON.stringify(cartData);
+                console.log('[PAYMENT PAGE] Cart data prepared for submission:', cartData);
+            }
+        }
+        
+        // Initialize when DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[PAYMENT PAGE] DOM ready, rendering summary...');
+            renderPaymentSummary();
+            prepareCartData();
+            
+            // Update cart data sebelum form submit
+            const checkoutForm = document.getElementById('checkout-form');
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', function() {
+                    prepareCartData();
+                    console.log('[PAYMENT PAGE] Form submitted with cart data');
+                });
+            }
+            
+            // Replace feather icons
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        });
+    </script>
+</body>
 </html>
