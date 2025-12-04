@@ -32,16 +32,26 @@ let cart = [];
 
 // Load cart from localStorage
 function loadCartFromStorage() {
-    const savedCart = localStorage.getItem('threeofkind_cart');
+    const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-        cart = JSON.parse(savedCart);
-        updateCartBadge();
+        try {
+            cart = JSON.parse(savedCart);
+            console.log('✓ Cart loaded from localStorage:', cart);
+        } catch (e) {
+            console.error('Error parsing cart:', e);
+            cart = [];
+        }
+    } else {
+        console.log('No cart found in localStorage');
+        cart = [];
     }
+    updateCartBadge();
 }
 
 // Save cart to localStorage
 function saveCartToStorage() {
-    localStorage.setItem('threeofkind_cart', JSON.stringify(cart));
+    localStorage.setItem('cart', JSON.stringify(cart));
+    console.log('✓ Cart saved to localStorage:', cart);
     updateCartBadge();
 }
 
@@ -125,40 +135,226 @@ function formatCurrency(amount) {
 
 // Add to cart functionality
 function addToCart(productId, quantity = 1) {
+    console.log(`[ADD TO CART] Product ID: ${productId}, Quantity: ${quantity}`);
+    
     const product = productsData[productId];
-    if (!product) return;
+    if (!product) {
+        console.error('Product not found:', productId);
+        return;
+    }
 
-    const existingItem = cart.find(item => item.productId === productId);
+    const existingItem = cart.find(item => item.productId == productId);
     
     if (existingItem) {
         existingItem.quantity += quantity;
+        console.log(`✓ Updated quantity for ${product.name}: ${existingItem.quantity}`);
     } else {
-        cart.push({
+        const newItem = {
             id: Date.now(),
-            productId: productId,
+            productId: parseInt(productId),
             name: product.name,
             price: product.price,
             priceFormatted: product.priceFormatted,
             image: product.image,
             quantity: quantity
-        });
+        };
+        cart.push(newItem);
+        console.log(`✓ Added new item:`, newItem);
     }
     
     saveCartToStorage();
     updateCartBadge();
+    
+    console.log('[ADD TO CART] Current cart:', cart);
 }
 
-// Remove from cart
+// Remove from cart - IMPROVED NOTIFICATION
 function removeFromCart(cartItemId) {
+    console.log(`[REMOVE] Removing item ID: ${cartItemId}`);
+    
+    const item = cart.find(item => item.id === cartItemId);
+    if (!item) return;
+    
+    // Create custom modal confirmation
+    const confirmModal = document.createElement('div');
+    confirmModal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    confirmModal.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        ">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="
+                    width: 60px;
+                    height: 60px;
+                    background: linear-gradient(135deg, #fee2e2, #fecaca);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 1rem;
+                ">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                </div>
+                <h3 style="
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-bottom: 0.5rem;
+                ">Hapus Produk?</h3>
+                <p style="
+                    color: #64748b;
+                    font-size: 0.95rem;
+                    line-height: 1.5;
+                    margin: 0;
+                ">${item.name}</p>
+            </div>
+            
+            <div style="display: flex; gap: 0.75rem;">
+                <button onclick="closeDeleteModal()" style="
+                    flex: 1;
+                    padding: 0.875rem 1.5rem;
+                    border: 2px solid #e2e8f0;
+                    background: white;
+                    color: #64748b;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                ">Batal</button>
+                
+                <button onclick="confirmRemoveItem(${cartItemId})" style="
+                    flex: 1;
+                    padding: 0.875rem 1.5rem;
+                    border: none;
+                    background: linear-gradient(135deg, #ef4444, #dc2626);
+                    color: white;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+                ">Hapus</button>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes slideUp {
+                from { 
+                    opacity: 0;
+                    transform: translateY(20px) scale(0.95);
+                }
+                to { 
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+        </style>
+    `;
+    
+    confirmModal.id = 'deleteModal';
+    document.body.appendChild(confirmModal);
+}
+
+// Close delete modal
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) modal.remove();
+}
+
+// Confirm remove item
+function confirmRemoveItem(cartItemId) {
+    closeDeleteModal();
+    
+    const item = cart.find(item => item.id === cartItemId);
+    const itemName = item ? item.name : 'Produk';
+    
     cart = cart.filter(item => item.id !== cartItemId);
     saveCartToStorage();
     updateCartBadge();
     renderCart();
-    showNotification('Produk dihapus dari keranjang');
+    
+    showSuccessNotification(`${itemName} telah dihapus dari keranjang`);
+}
+
+// Show success notification
+function showSuccessNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: white;
+        color: #1e293b;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        font-weight: 500;
+        border-left: 4px solid #10b981;
+    `;
+    
+    notification.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(120%)';
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 400);
+    }, 3000);
 }
 
 // Update quantity in cart
 function updateQuantity(cartItemId, newQuantity) {
+    console.log(`[UPDATE QTY] Item ID: ${cartItemId}, New Qty: ${newQuantity}`);
     const item = cart.find(item => item.id === cartItemId);
     if (item && newQuantity > 0) {
         item.quantity = newQuantity;
@@ -177,6 +373,8 @@ function getCartTotal() {
 // Update cart badge
 function updateCartBadge() {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    console.log(`[BADGE] Total items: ${totalItems}`);
+    
     const badges = document.querySelectorAll('.cart-badge, #cart-badge-header');
     badges.forEach(badge => {
         if (badge) {
@@ -189,28 +387,28 @@ function updateCartBadge() {
 // Render cart page
 function renderCart() {
     const cartContent = document.getElementById('cart-content');
-    if (!cartContent) return;
+    if (!cartContent) {
+        console.log('[RENDER CART] cart-content element not found');
+        return;
+    }
+
+    console.log('[RENDER CART] Rendering cart with', cart.length, 'items');
 
     if (cart.length === 0) {
         cartContent.innerHTML = `
             <div class="cart-items">
                 <div class="empty-cart">
-                    <i data-feather="shopping-cart" style="width: 100px; height: 100px;"></i>
+                    <div class="empty-cart-icon">
+                        <i data-feather="shopping-cart"></i>
+                    </div>
                     <h3>Keranjang Anda Kosong</h3>
                     <p>Sepertinya Anda belum menambahkan produk ke keranjang</p>
-                    <button class="btn btn-primary" onclick="window.location.href='/products/'">
+                    <a href="/products/" class="btn btn-primary">
                         <i data-feather="arrow-left"></i>
                         Mulai Belanja
-                    </button>
+                    </a>
                 </div>
             </div>
-            <aside class="cart-summary">
-                <h2>Ringkasan Belanja</h2>
-                <div class="summary-row total">
-                    <span>Total</span>
-                    <span>${formatCurrency(0)}</span>
-                </div>
-            </aside>
         `;
         feather.replace();
         return;
@@ -224,16 +422,13 @@ function renderCart() {
             <div class="cart-item-details">
                 <h3 class="cart-item-name">${item.name}</h3>
                 <p class="cart-item-price">${formatCurrency(item.price)}</p>
-                <div class="quantity-selector">
-                    <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
-                    <input type="number" value="${item.quantity}" min="1" readonly>
-                    <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
-                </div>
             </div>
             <div class="cart-item-actions">
-                <p style="font-size: 1.35rem; font-weight: bold; color: #ef4444;">
-                    ${formatCurrency(item.price * item.quantity)}
-                </p>
+                <div class="quantity-selector">
+                    <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                    <input type="number" value="${item.quantity}" readonly>
+                    <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                </div>
                 <button class="remove-btn" onclick="removeFromCart(${item.id})">
                     <i data-feather="trash-2"></i>
                     Hapus
@@ -247,56 +442,72 @@ function renderCart() {
     const total = subtotal + shipping;
 
     cartContent.innerHTML = `
-        <div class="cart-items">
-            ${cartItemsHTML}
-        </div>
-        
-        <aside class="cart-summary">
-            <h2>Ringkasan Belanja</h2>
+        <div class="cart-content">
+            <div class="cart-items">
+                ${cartItemsHTML}
+            </div>
             
-            <div class="promo-code">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Kode Promo</label>
-                <div class="promo-input-group">
-                    <input type="text" placeholder="Masukkan kode promo">
-                    <button>Terapkan</button>
+            <aside class="cart-summary">
+                <h2>Ringkasan Belanja</h2>
+                
+                <div class="promo-code">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Kode Promo</label>
+                    <div class="promo-input-group">
+                        <input type="text" placeholder="Masukkan kode promo" id="promo-input">
+                        <button onclick="applyPromo()">Terapkan</button>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="summary-row">
-                <span>Subtotal (${cart.reduce((sum, item) => sum + item.quantity, 0)} item)</span>
-                <span>${formatCurrency(subtotal)}</span>
-            </div>
-            <div class="summary-row">
-                <span>Ongkir</span>
-                <span>${formatCurrency(shipping)}</span>
-            </div>
-            <div class="summary-row total">
-                <span>Total</span>
-                <span>${formatCurrency(total)}</span>
-            </div>
-            
-            <button class="btn btn-success" onclick="proceedToCheckout()">
-                <i data-feather="credit-card"></i>
-                Lanjut ke Pembayaran
-            </button>
-            
-            <div class="continue-shopping">
-                <a href="/products/">
-                    <i data-feather="arrow-left"></i>
-                    Lanjut Belanja
-                </a>
-            </div>
-        </aside>
+                
+                <div class="summary-row">
+                    <span>Subtotal (${cart.reduce((sum, item) => sum + item.quantity, 0)} item)</span>
+                    <span>${formatCurrency(subtotal)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Ongkir</span>
+                    <span>${formatCurrency(shipping)}</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>${formatCurrency(total)}</span>
+                </div>
+                
+                <button class="btn btn-success" onclick="proceedToCheckout()">
+                    <i data-feather="credit-card"></i>
+                    Lanjut ke Pembayaran
+                </button>
+                
+                <div class="continue-shopping">
+                    <a href="/products/">
+                        <i data-feather="arrow-left"></i>
+                        Lanjut Belanja
+                    </a>
+                </div>
+            </aside>
+        </div>
     `;
 
     feather.replace();
 }
 
-// ========================================
-// PROCEED TO CHECKOUT - SIMPLE VERSION (NO SYNC)
-// ========================================
+// Apply promo code
+function applyPromo() {
+    const promoInput = document.getElementById('promo-input');
+    if (!promoInput) return;
+    
+    const code = promoInput.value.trim().toUpperCase();
+    
+    if (code === 'DISKON10') {
+        showNotification('Kode promo berhasil! Diskon 10%');
+    } else if (code === '') {
+        showNotification('Masukkan kode promo');
+    } else {
+        showNotification('Kode promo tidak valid');
+    }
+}
+
+// Proceed to checkout
 function proceedToCheckout() {
-    console.log('[CHECKOUT] Starting simple checkout...');
+    console.log('[CHECKOUT] Starting checkout...');
     
     if (cart.length === 0) {
         alert('Keranjang Anda kosong!');
@@ -306,12 +517,88 @@ function proceedToCheckout() {
     console.log('[CHECKOUT] Cart:', cart);
     console.log('[CHECKOUT] Redirecting to /payment/...');
     
-    // LANGSUNG REDIRECT TANPA SYNC!
     window.location.href = '/payment/';
+}
+
+// Initialize payment form
+function initializePaymentForm() {
+    const paymentOptions = document.querySelectorAll('input[name="payment_method"]');
+    const paymentForm = document.getElementById('checkout-form');
+    
+    if (paymentOptions.length > 0) {
+        const ccDetails = document.getElementById('creditCardDetails');
+        const vaDetails = document.getElementById('bankTransferDetails');
+        const ewDetails = document.getElementById('eWalletDetails');
+        const qrisDetails = document.getElementById('qrisDetails');
+
+        paymentOptions.forEach(option => {
+            option.addEventListener('change', function() {
+                if(ccDetails) ccDetails.style.display = 'none';
+                if(vaDetails) vaDetails.style.display = 'none';
+                if(ewDetails) ewDetails.style.display = 'none';
+                if(qrisDetails) qrisDetails.style.display = 'none';
+
+                if (this.value === 'credit_card') {
+                    if(ccDetails) ccDetails.style.display = 'block';
+                } else if (this.value === 'bank_transfer') {
+                    if(vaDetails) vaDetails.style.display = 'block';
+                } else if (this.value === 'e_wallet') {
+                    if(ewDetails) ewDetails.style.display = 'block';
+                } else if (this.value === 'qris') {
+                    if(qrisDetails) qrisDetails.style.display = 'block';
+                }
+            });
+        });
+    }
+    
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            console.log('[PAYMENT FORM] Form submitted');
+            
+            if (cart.length === 0) {
+                alert('Keranjang Anda kosong! Silakan tambahkan produk terlebih dahulu.');
+                window.location.href = '/products/';
+                return false;
+            }
+            
+            const cartData = {};
+            cart.forEach(item => {
+                cartData[item.productId] = {
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    image: item.image
+                };
+            });
+            
+            console.log('[PAYMENT FORM] Cart data:', cartData);
+            
+            let cartInput = this.querySelector('input[name="cart_data"]');
+            
+            if (!cartInput) {
+                cartInput = document.createElement('input');
+                cartInput.type = 'hidden';
+                cartInput.name = 'cart_data';
+                this.appendChild(cartInput);
+                console.log('[PAYMENT FORM] Created hidden input for cart_data');
+            }
+            
+            cartInput.value = JSON.stringify(cartData);
+            
+            console.log('[PAYMENT FORM] Cart JSON:', cartInput.value);
+            console.log('[PAYMENT FORM] Submitting form to backend...');
+            
+            this.submit();
+        });
+    }
 }
 
 // Show notification
 function showNotification(message) {
+    console.log('[NOTIFICATION]', message);
+    
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
@@ -362,8 +649,13 @@ function initializeProductCards() {
 
 // Open product modal
 function openProductModal(productId) {
+    console.log('[MODAL] Opening modal for product:', productId);
+    
     const product = productsData[productId];
-    if (!product) return;
+    if (!product) {
+        console.error('Product not found:', productId);
+        return;
+    }
 
     document.getElementById('modalImage').src = product.image; 
     document.getElementById('modalImage').alt = product.name;
@@ -379,19 +671,9 @@ function openProductModal(productId) {
     }
 
     const stockEl = document.getElementById('modalStock');
-    let stockClass = 'in-stock';
-    let stockText = `${product.stock} in stock`;
-    
-    if (product.stock === 0) {
-        stockClass = 'out-of-stock';
-        stockText = 'Stok habis';
-    } else if (product.stock <= 5) {
-        stockClass = 'low-stock';
-        stockText = `Tinggal ${product.stock} lagi!`;
+    if (stockEl) {
+        stockEl.style.display = 'none';
     }
-    
-    stockEl.className = `stock-status ${stockClass}`;
-    stockEl.textContent = stockText;
 
     document.getElementById('modalDescription').textContent = product.description;
 
@@ -406,7 +688,7 @@ function openProductModal(productId) {
     }
 
     const quantityInput = document.getElementById('quantityInput');
-    quantityInput.max = Math.min(product.stock, 10);
+    quantityInput.max = 9999;
     quantityInput.value = 1;
 
     document.getElementById('productModal').dataset.currentProduct = productId;
@@ -429,11 +711,8 @@ function closeModal() {
 function increaseQuantity() {
     const input = document.getElementById('quantityInput');
     if (!input) return;
-    const max = parseInt(input.max);
     const current = parseInt(input.value);
-    if (current < max) {
-        input.value = current + 1;
-    }
+    input.value = current + 1;
 }
 
 function decreaseQuantity() {
@@ -447,23 +726,34 @@ function decreaseQuantity() {
 
 // Add to cart from modal
 function addToCartFromModal() {
+    console.log('[MODAL] Add to cart button clicked');
+    
     const modal = document.getElementById('productModal');
     const input = document.getElementById('quantityInput');
-    if (!modal || !input) return;
+    if (!modal || !input) {
+        console.error('Modal or input not found');
+        return;
+    }
 
     const productId = modal.dataset.currentProduct;
     const quantity = parseInt(input.value);
     const product = productsData[productId];
     
-    if (product && quantity > 0 && quantity <= product.stock) {
+    console.log(`[MODAL] Product ID: ${productId}, Quantity: ${quantity}`);
+    
+    if (product && quantity > 0) {
         addToCart(productId, quantity);
-        showNotification(`${quantity}x ${product.name} berhasil ditambahkan ke keranjang!`);
+        showNotification(`${quantity}x ${product.name} ditambahkan ke keranjang!`);
         closeModal();
+    } else {
+        console.error('Invalid product or quantity');
     }
 }
 
 // Buy now from modal
 function buyNowFromModal() {
+    console.log('[MODAL] Buy now button clicked');
+    
     const modal = document.getElementById('productModal');
     const input = document.getElementById('quantityInput');
     if (!modal || !input) return;
@@ -472,7 +762,7 @@ function buyNowFromModal() {
     const quantity = parseInt(input.value);
     const product = productsData[productId];
     
-    if (product && quantity > 0 && quantity <= product.stock) {
+    if (product && quantity > 0) {
         addToCart(productId, quantity);
         showNotification(`Menuju checkout untuk ${quantity}x ${product.name}...`);
         
@@ -559,36 +849,6 @@ function initializeFavorites() {
                 this.classList.add('favorited');
                 this.style.color = '#ef4444';
                 showNotification('Ditambahkan ke favorites');
-            }
-        });
-    });
-}
-
-// Payment form initialization
-function initializePaymentForm() {
-    const paymentOptions = document.querySelectorAll('input[name="payment_method"]');
-    if (paymentOptions.length === 0) return;
-
-    const ccDetails = document.getElementById('creditCardDetails');
-    const vaDetails = document.getElementById('bankTransferDetails');
-    const ewDetails = document.getElementById('eWalletDetails');
-    const qrisDetails = document.getElementById('qrisDetails');
-
-    paymentOptions.forEach(option => {
-        option.addEventListener('change', function() {
-            if(ccDetails) ccDetails.style.display = 'none';
-            if(vaDetails) vaDetails.style.display = 'none';
-            if(ewDetails) ewDetails.style.display = 'none';
-            if(qrisDetails) qrisDetails.style.display = 'none';
-
-            if (this.value === 'credit_card') {
-                if(ccDetails) ccDetails.style.display = 'block';
-            } else if (this.value === 'bank_transfer') {
-                if(vaDetails) vaDetails.style.display = 'block';
-            } else if (this.value === 'e_wallet') {
-                if(ewDetails) ewDetails.style.display = 'block';
-            } else if (this.value === 'qris') {
-                if(qrisDetails) qrisDetails.style.display = 'block';
             }
         });
     });
@@ -688,3 +948,96 @@ function initializeModalTabs() {
         });
     });
 }
+// ═══════════════════════════════════════════════════════════
+// WISHLIST MANAGEMENT
+// ═══════════════════════════════════════════════════════════
+
+function toggleFavorite(button) {
+    const productCard = button.closest('.product-card');
+    const productId = parseInt(productCard.getAttribute('data-product-id'));
+    
+    let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    const existingIndex = wishlist.findIndex(item => item.id === productId);
+    
+    if (existingIndex > -1) {
+        // Remove from wishlist
+        wishlist.splice(existingIndex, 1);
+        button.classList.remove('favorited');
+        showWishlistNotification('Removed from wishlist');
+    } else {
+        // Add to wishlist
+        const productName = productCard.querySelector('.product-name').textContent;
+        const productImage = productCard.querySelector('.product-image img').src;
+        const currentPrice = productCard.querySelector('.current-price').textContent.replace('IDR ', '').replace(/\./g, '').trim();
+        const originalPriceElement = productCard.querySelector('.original-price');
+        const originalPrice = originalPriceElement ? originalPriceElement.textContent.replace('IDR ', '').replace(/\./g, '').trim() : null;
+        
+        wishlist.push({
+            id: productId,
+            name: productName,
+            price: parseInt(currentPrice),
+            originalPrice: originalPrice ? parseInt(originalPrice) : null,
+            image: productImage
+        });
+        
+        button.classList.add('favorited');
+        showWishlistNotification('✓ Added to wishlist!');
+    }
+    
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    updateWishlistBadge();
+}
+
+function updateWishlistBadge() {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    const badge = document.getElementById('wishlist-badge-header');
+    
+    if (badge) {
+        badge.textContent = wishlist.length;
+        badge.style.display = wishlist.length > 0 ? 'flex' : 'none';
+    }
+}
+
+function showWishlistNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+        z-index: 10000;
+        font-weight: 600;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 2000);
+}
+
+// Load wishlist state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    
+    // Mark favorited products
+    document.querySelectorAll('.product-card').forEach(card => {
+        const productId = parseInt(card.getAttribute('data-product-id'));
+        const isFavorited = wishlist.some(item => item.id === productId);
+        
+        if (isFavorited) {
+            const favoriteBtn = card.querySelector('.favorite-btn');
+            if (favoriteBtn) {
+                favoriteBtn.classList.add('favorited');
+            }
+        }
+    });
+    
+    updateWishlistBadge();
+});

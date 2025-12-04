@@ -5,38 +5,378 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/feather-icons"></script>
-    <link rel="stylesheet" href="{% static 'blog/content.css' %}?v=1.5">
-    <title>Contact - Threeofkind.supply</title>
+    <link rel="stylesheet" href="{% static 'blog/content.css' %}">
+    <title>Contact Us - Threeofkind.supply</title>
+    <style>
+        .contact-page {
+            min-height: calc(100vh - 140px);
+            background: linear-gradient(135deg, #000000 0%, #510707 100%);
+            padding: 5rem 2rem;
+        }
+        
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+        
+        .contact-info {
+            color: white;
+        }
+        
+        .contact-info h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #ef4444;
+        }
+        
+        .contact-info p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 3rem;
+            color: #e2e8f0;
+        }
+        
+        .contact-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .contact-method {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .contact-method:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(10px);
+        }
+        
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .contact-icon svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+        }
+        
+        .contact-details h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .contact-details p {
+            margin: 0;
+            color: #cbd5e1;
+            font-size: 1rem;
+        }
+        
+        .contact-details a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .contact-details a:hover {
+            color: #ef4444;
+        }
+        
+        .contact-form-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .contact-form-container h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .success-message svg {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            
+            .contact-info h1 {
+                font-size: 2rem;
+            }
+            
+            .contact-form-container {
+                padding: 2rem;
+            }
+            
+            .contact-page {
+                padding: 3rem 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <a href="/">
-                    <img src="{% static 'blog/pict/logo.png'%}?v=1.4" class="logo-image">
-                </a>
+                <a href="/"><img src="{% static 'blog/pict/logo.png'%}" class="logo-image"></a>
             </div>
-            
             <nav class="nav">
-                <a href="/">Home</a>
-                <a href="/products/">Product</a>
-                <a href="/about/">About Us</a>
-                <a href="/contact/" class="active">Contact</a> </nav>
-            
+                <a href="javascript:void(0)" onclick="window.location.href='/#hero'">Home</a>
+                <a href="javascript:void(0)" onclick="window.location.href='/#catalog'">Product</a>
+                <a href="javascript:void(0)" onclick="window.location.href='/#about-section'">About Us</a>
+                <a href="/contact/">Contact</a>
+            </nav>
             <div class="header-right">
-                </div>
+                <a href="/cart/" class="cart-btn">
+                    <i data-feather="shopping-cart"></i>
+                    <span class="cart-badge" id="cart-badge-header">0</span>
+                </a>
+                <a href="#wishlist" class="cart-btn">
+                    <i data-feather="heart"></i>
+                </a>
+                <a href="/payment/" class="cart-btn">
+                    <i data-feather="credit-card"></i>
+                </a>
+                {% if request.user.is_authenticated %}
+                    <a href="/logout/" class="cart-btn">
+                        <i data-feather="log-out"></i>
+                        <span style="margin-left: 8px;">Hi, {{ request.user.username }}</span>
+                    </a>
+                {% else %}
+                    <a href="/login/" class="cart-btn">
+                        <i data-feather="user"></i>
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
-    <main class="main-content" style="padding: 4rem 2rem; min-height: 60vh;">
-        <div style="max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; color: #1e293b;">
-            <h1>Contact Us</h1>
-            <p>Silakan hubungi kami melalui email di support@threeofkind.id.</p>
+    <main class="contact-page">
+        <div class="contact-container">
+            <div class="contact-info">
+                <h1>Hubungi Kami</h1>
+                <p>Punya pertanyaan atau butuh bantuan? Tim kami siap membantu Anda!</p>
+                
+                <div class="contact-methods">
+                    <!-- EMAIL -->
+                    <a href="mailto:threeofkind1@gmail.com" style="text-decoration: none;">
+                        <div class="contact-method">
+                            <div class="contact-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Email</h3>
+                                <p>threeofkind1@gmail.com</p>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <!-- WHATSAPP -->
+                    <a href="https://wa.me/6282225580700?text=Halo%20Threeofkind.supply%2C%20saya%20mau%20bertanya%20tentang%20produk" target="_blank" style="text-decoration: none;">
+                        <div class="contact-method">
+                            <div class="contact-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                            </div>
+                            <div class="contact-details">
+                                <h3>WhatsApp</h3>
+                                <p>+62 822-2558-0700</p>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <!-- LOCATION -->
+                    <a href="https://maps.google.com/?q=Makassar" target="_blank" style="text-decoration: none;">
+                        <div class="contact-method">
+                            <div class="contact-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Alamat</h3>
+                                <p>Jl.Tamangapa Raya 3 <br>Makassar, Indonesia</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="contact-form-container">
+                <h2>Kirim Pesan</h2>
+                
+                {% if success %}
+                <div class="success-message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>{{ success }}</span>
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="{% url 'contact_page' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name">Nama Lengkap</label>
+                        <input type="text" id="name" name="name" placeholder="John Doe" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Subjek</label>
+                        <input type="text" id="subject" name="subject" placeholder="Pertanyaan tentang produk" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Pesan</label>
+                        <textarea id="message" name="message" placeholder="Tulis pesan Anda di sini..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        Kirim Pesan
+                    </button>
+                </form>
+            </div>
         </div>
     </main>
 
     {% include 'blog/footer.html' %}
 
-    <script src="{% static 'blog/lund.js' %}?v=1.5"></script>
+    <script src="{% static 'blog/lund.js' %}"></script>
+    <script>
+        feather.replace();
+        
+        // Update cart badge
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const badge = document.getElementById('cart-badge-header');
+        if (badge) {
+            badge.textContent = totalItems;
+            badge.style.display = totalItems > 0 ? 'flex' : 'none';
+        }
+    </script>
 </body>
 </html>

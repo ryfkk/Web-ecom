@@ -1,0 +1,180 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{% static 'blog/content.css' %}?v=2.0">
+    <title>Pengaturan Profile - Threeofkind.supply</title>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="/">
+                    <img src="{% static 'blog/pict/logo.png'%}?v=2.0" class="logo-image">
+                </a>
+            </div>
+            
+            <nav class="nav">
+                <a href="/">Home</a>
+                <a href="/products/">Product</a>
+                <a href="/about/">About Us</a>
+                <a href="/contact/">Contact</a>
+            </nav>
+            
+            <div class="header-right">
+                <a href="/cart/" class="cart-btn">
+                    <i data-feather="shopping-cart"></i>
+                    <span class="cart-badge" id="cart-badge-header">0</span> 
+                </a>
+                <a href="#wishlist" class="cart-btn" id="wishlist-btn">
+                    <i data-feather="heart"></i>
+                </a>
+                
+                <a href="/profile/" class="cart-btn" id="user-btn" title="Profile">
+                    <i data-feather="user"></i>
+                    <span style="margin-left: 8px; font-weight: 500;">Hi, {{ request.user.username }}</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <main class="content">
+            <!-- Back to Dashboard -->
+            <div style="margin-bottom: 2rem;">
+                <a href="/profile/" style="display: inline-flex; align-items: center; gap: 8px; color: #64748b; text-decoration: none; font-weight: 500; transition: all 0.3s;">
+                    <i data-feather="arrow-left" style="width: 18px; height: 18px;"></i>
+                    Kembali ke Dashboard
+                </a>
+            </div>
+
+            <!-- Settings Form -->
+            <div style="background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08); border: 1px solid rgba(239, 68, 68, 0.1);">
+                <h2 style="font-size: 1.75rem; font-weight: 700; color: #1e293b; margin-bottom: 1.5rem;">Pengaturan Akun</h2>
+
+                {% if error %}
+                    <div style="padding: 12px; border-radius: 8px; margin-bottom: 1.5rem; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; display: flex; align-items: center; gap: 10px;">
+                        <i data-feather="alert-circle" style="width: 18px; height: 18px;"></i>
+                        {{ error }}
+                    </div>
+                {% endif %}
+                
+                {% if success %}
+                    <div style="padding: 12px; border-radius: 8px; margin-bottom: 1.5rem; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; display: flex; align-items: center; gap: 10px;">
+                        <i data-feather="check-circle" style="width: 18px; height: 18px;"></i>
+                        {{ success }}
+                    </div>
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <!-- Profile Information -->
+                    <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #e2e8f0;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin-bottom: 1.5rem;">Informasi Profile</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <div class="input-wrapper">
+                                    <i data-feather="user"></i>
+                                    <input type="text" id="username" name="username" class="form-input" value="{{ user.username }}" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <div class="input-wrapper">
+                                    <i data-feather="mail"></i>
+                                    <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first_name">Nama Depan</label>
+                                <div class="input-wrapper">
+                                    <i data-feather="user"></i>
+                                    <input type="text" id="first_name" name="first_name" class="form-input" value="{{ user.first_name }}" placeholder="Opsional">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="last_name">Nama Belakang</label>
+                                <div class="input-wrapper">
+                                    <i data-feather="user"></i>
+                                    <input type="text" id="last_name" name="last_name" class="form-input" value="{{ user.last_name }}" placeholder="Opsional">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem;">Ganti Password</h3>
+                        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem;">Kosongkan jika tidak ingin mengubah password</p>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new_password">Password Baru</label>
+                                <div class="input-wrapper">
+                                    <i data-feather="lock"></i>
+                                    <input type="password" id="new_password" name="new_password" class="form-input" placeholder="Minimal 8 karakter" minlength="8">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirm_password">Konfirmasi Password Baru</label>
+                                <div class="input-wrapper">
+                                    <i data-feather="lock"></i>
+                                    <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Ketik ulang password baru" minlength="8">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i data-feather="save"></i>
+                        Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    {% include 'blog/footer.html' %}
+
+    <script src="{% static 'blog/lund.js' %}?v=2.0"></script>
+    <script>
+        feather.replace();
+
+        // Password match validation
+        const form = document.querySelector('form');
+        const newPassword = document.getElementById('new_password');
+        const confirmPassword = document.getElementById('confirm_password');
+
+        form.addEventListener('submit', function(e) {
+            if (newPassword.value && confirmPassword.value) {
+                if (newPassword.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    alert('Password konfirmasi tidak cocok!');
+                    confirmPassword.focus();
+                    return false;
+                }
+            }
+
+            if (newPassword.value && newPassword.value.length < 8) {
+                e.preventDefault();
+                alert('Password minimal 8 karakter!');
+                newPassword.focus();
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

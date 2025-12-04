@@ -1,0 +1,735 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="{% static 'blog/content.css' %}?v=3.5">
+    <title>Dashboard Profile - Threeofkind.supply</title>
+    <style>
+        /* Match catalog theme */
+        html, body {
+            scroll-behavior: smooth;
+            background: #000000;
+        }
+        
+        .profile-page {
+            background: #000000;
+        }
+        
+        .user-info-card {
+            background: linear-gradient(135deg, #000000 0%, #2a0f0f 100%);
+            border: 1px solid #590c0c;
+        }
+        
+        .user-avatar {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .user-details h2 {
+            color: #ffffff;
+        }
+        
+        .user-email,
+        .user-join-date {
+            color: #94a3b8;
+        }
+        
+        .stats-grid {
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #000000 0%, #0f172a 100%);
+            border: 1px solid #500707;
+        }
+        
+        .stat-value {
+            color: #ffffff;
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+        }
+        
+        .orders-section {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+        }
+        
+        .orders-header h2 {
+            color: #ffffff;
+        }
+        
+        .order-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+        }
+        
+        .order-card:hover {
+            border-color: #ef4444;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+        }
+        
+        .order-id-section strong {
+            color: #ffffff;
+        }
+        
+        .order-item-name {
+            color: #e2e8f0;
+        }
+        
+        .empty-orders {
+            color: #94a3b8;
+        }
+        
+        .empty-orders h3 {
+            color: #ffffff;
+        }
+        
+        .orders-list {
+            min-height: 400px;
+            transition: opacity 0.3s ease;
+        }
+        
+        .orders-list.loading {
+            opacity: 0.5;
+        }
+        
+        .main-content {
+            background: #000000;
+        }
+        
+        /* CANCEL BUTTON */
+        .btn-cancel {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-cancel:hover {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-cancel:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid #ef4444;
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 450px;
+            width: 90%;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 20px 60px rgba(239, 68, 68, 0.3);
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+        }
+        
+        .modal-icon i {
+            color: white;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .modal-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-message {
+            color: #94a3b8;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .modal-order-info {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .modal-order-id {
+            color: #ef4444;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-order-total {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .modal-btn-cancel {
+            background: #334155;
+            color: #ffffff;
+            border: 1px solid #475569;
+        }
+        
+        .modal-btn-cancel:hover {
+            background: #475569;
+        }
+        
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .modal-btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .modal-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body style="background: #000000;">
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="/">
+                    <img src="{% static 'blog/pict/logo.png'%}?v=2.0" class="logo-image">
+                </a>
+            </div>
+            
+            <nav class="nav">
+                <a href="javascript:void(0)" onclick="window.location.href='/#hero'">Home</a>
+                <a href="javascript:void(0)" onclick="window.location.href='/#catalog'">Product</a>
+                <a href="javascript:void(0)" onclick="window.location.href='/#about-section'">About Us</a>
+                <a href="/contact/">Contact</a>
+            </nav>
+            
+            <div class="header-right">
+                <a href="/cart/" class="cart-btn">
+                    <i data-feather="shopping-cart"></i>
+                    <span class="cart-badge" id="cart-badge-header">0</span> 
+                </a>
+                <a href="#wishlist" class="cart-btn" id="wishlist-btn">
+                    <i data-feather="heart"></i>
+                </a>
+                
+                <a href="/profile/" class="cart-btn active" id="user-btn" title="Profile">
+                    <i data-feather="user"></i>
+                    <span style="margin-left: 8px; font-weight: 500;">Hi, {{ request.user.username }}</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i data-feather="alert-circle"></i>
+                </div>
+                <h3 class="modal-title">Batalkan Pesanan?</h3>
+                <p class="modal-message">Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            
+            <div class="modal-order-info">
+                <div class="modal-order-id" id="modal-order-id">ORD-XXX</div>
+                <div class="modal-order-total" id="modal-order-total">Total: IDR 0</div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">
+                    <i data-feather="x"></i>
+                    Tidak
+                </button>
+                <button class="modal-btn modal-btn-confirm" id="modal-confirm-btn" onclick="confirmCancel()">
+                    <i data-feather="trash-2"></i>
+                    Ya, Batalkan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content profile-page">
+        <main class="content" style="background: transparent;">
+            <!-- User Info Card -->
+            <div class="user-info-card">
+                <div class="user-info-header">
+                    <div class="user-info-left">
+                        <div class="user-avatar">
+                            <i data-feather="user"></i>
+                        </div>
+                        <div class="user-details">
+                            <h2>{{ user.username }}</h2>
+                            <p class="user-email">
+                                <i data-feather="mail" style="width: 14px; height: 14px;"></i>
+                                {{ user.email }}
+                            </p>
+                            <p class="user-join-date">
+                                <i data-feather="calendar"></i>
+                                Bergabung {{ user.date_joined|date:"d M Y" }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <a href="/profile/settings/" class="btn-settings">
+                            <i data-feather="settings"></i>
+                            Pengaturan
+                        </a>
+                        <a href="/logout/" class="btn-logout">
+                            <i data-feather="log-out"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✅ STATS GRID - FIXED WITH .stat-details WRAPPER -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-feather="shopping-bag"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-value">{{ total_orders|default:0 }}</div>
+                        <div class="stat-label">Total Pesanan</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <i data-feather="check-circle"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-value">{{ completed_orders|default:0 }}</div>
+                        <div class="stat-label">Pesanan Selesai</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i data-feather="clock"></i>
+                    </div>
+                    <div class="stat-details">
+                        <div class="stat-value">{{ pending_orders|default:0 }}</div>
+                        <div class="stat-label">Pesanan Pending</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div class="orders-section" id="ordersSection">
+                <div class="orders-header">
+                    <h2>Pesanan Saya</h2>
+                    <div class="status-filters">
+                        <button class="filter-btn {% if status_filter == 'all' or not status_filter %}active{% endif %}" data-status="all">Semua</button>
+                        <button class="filter-btn {% if status_filter == 'pending' %}active{% endif %}" data-status="pending">⏳ Pending</button>
+                        <button class="filter-btn {% if status_filter == 'paid' %}active{% endif %}" data-status="paid">✓ Dibayar</button>
+                        <button class="filter-btn {% if status_filter == 'processing' %}active{% endif %}" data-status="processing">📦 Diproses</button>
+                        <button class="filter-btn {% if status_filter == 'shipped' %}active{% endif %}" data-status="shipped">🚚 Dikirim</button>
+                        <button class="filter-btn {% if status_filter == 'delivered' %}active{% endif %}" data-status="delivered">✓ Selesai</button>
+                        <button class="filter-btn {% if status_filter == 'cancelled' %}active{% endif %}" data-status="cancelled">✗ Dibatalkan</button>
+                    </div>
+                </div>
+
+                <div class="orders-list" id="ordersList">
+                    {% if orders %}
+                        {% for order in orders %}
+                        <div class="order-card" data-order-status="{{ order.status }}" data-order-id="{{ order.order_id }}" style="display: none;">
+                            <div class="order-header">
+                                <div class="order-id-section">
+                                    <strong>{{ order.order_id }}</strong><br>
+                                    <small class="order-date">
+                                        <i data-feather="calendar" style="width: 12px; height: 12px;"></i>
+                                        {{ order.created_at|date:"d M Y, H:i" }}
+                                    </small>
+                                </div>
+                                <div>
+                                    <span class="order-status-badge 
+                                        {% if order.status == 'pending' %}status-pending
+                                        {% elif order.status == 'paid' %}status-paid
+                                        {% elif order.status == 'processing' %}status-processing
+                                        {% elif order.status == 'shipped' %}status-shipped
+                                        {% elif order.status == 'delivered' %}status-delivered
+                                        {% elif order.status == 'cancelled' %}status-cancelled
+                                        {% endif %}">
+                                        {% if order.status == 'pending' %}⏳ Menunggu Pembayaran
+                                        {% elif order.status == 'paid' %}✓ Dibayar
+                                        {% elif order.status == 'processing' %}📦 Diproses
+                                        {% elif order.status == 'shipped' %}🚚 Dikirim
+                                        {% elif order.status == 'delivered' %}✓ Selesai
+                                        {% elif order.status == 'cancelled' %}✗ Dibatalkan
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="order-items">
+                                {% for item in order.items.all %}
+                                <div class="order-item">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="order-item-image">
+                                    <div class="order-item-details">
+                                        <div class="order-item-name">{{ item.product.name }}</div>
+                                        <div class="order-item-meta">
+                                            Qty: {{ item.quantity }} × IDR {{ item.price|floatformat:0 }}
+                                        </div>
+                                    </div>
+                                    <div class="order-item-price">
+                                        <strong>IDR {{ item.get_subtotal|floatformat:0 }}</strong>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="order-footer">
+                                <div class="order-total">
+                                    <div class="order-total-label">Total Pembayaran</div>
+                                    <div class="order-total-amount">IDR {{ order.total_amount|floatformat:0 }}</div>
+                                </div>
+                                <div class="order-actions">
+                                    {% if order.status == 'pending' %}
+                                    <a href="/order-confirmation/{{ order.order_id }}/" class="btn-pay">
+                                        <i data-feather="credit-card" style="width: 18px; height: 18px;"></i>
+                                        Bayar Sekarang
+                                    </a>
+                                    <button class="btn-cancel" onclick="showCancelModal('{{ order.order_id }}', '{{ order.total_amount|floatformat:0 }}')">
+                                        <i data-feather="x-circle" style="width: 18px; height: 18px;"></i>
+                                        Batalkan
+                                    </button>
+                                    {% elif order.status == 'delivered' %}
+                                    <button class="btn-reorder" onclick="alert('Fitur Beli Lagi akan segera hadir!')">
+                                        <i data-feather="refresh-cw" style="width: 18px; height: 18px;"></i>
+                                        Beli Lagi
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-orders">
+                            <div class="empty-orders-icon">
+                                <i data-feather="inbox"></i>
+                            </div>
+                            <h3>Belum Ada Pesanan</h3>
+                            <p>Anda belum memiliki pesanan. Yuk mulai belanja!</p>
+                            <a href="/products/" class="btn-start-shopping">
+                                <i data-feather="shopping-bag"></i>
+                                Mulai Belanja
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    {% include 'blog/footer.html' %}
+
+    <script src="{% static 'blog/lund.js' %}?v=2.0"></script>
+    <script>
+        feather.replace();
+        
+        let currentOrderId = null;
+        
+        function showCancelModal(orderId, totalAmount) {
+            currentOrderId = orderId;
+            document.getElementById('modal-order-id').textContent = orderId;
+            document.getElementById('modal-order-total').textContent = `Total: IDR ${totalAmount}`;
+            
+            const scrollY = window.scrollY;
+            document.body.style.top = `-${scrollY}px`;
+            document.body.classList.add('modal-open');
+            
+            document.getElementById('cancelModal').classList.add('show');
+            feather.replace();
+        }
+        
+        function closeModal() {
+            const scrollY = document.body.style.top;
+            document.body.classList.remove('modal-open');
+            document.body.style.top = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            
+            document.getElementById('cancelModal').classList.remove('show');
+            currentOrderId = null;
+        }
+        
+        document.getElementById('cancelModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+        
+        function confirmCancel() {
+            if (!currentOrderId) return;
+            
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i data-feather="loader"></i> Membatalkan...';
+            feather.replace();
+            
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+            
+            fetch(`/api/cancel-order/${currentOrderId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeModal();
+                    const tempAlert = document.createElement('div');
+                    tempAlert.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                        color: white;
+                        padding: 1rem 1.5rem;
+                        border-radius: 12px;
+                        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+                        z-index: 10000;
+                        font-weight: 600;
+                        animation: slideInRight 0.3s ease;
+                    `;
+                    tempAlert.innerHTML = '✅ Pesanan berhasil dibatalkan!';
+                    document.body.appendChild(tempAlert);
+                    
+                    setTimeout(() => {
+                        tempAlert.style.animation = 'slideOutRight 0.3s ease';
+                        setTimeout(() => {
+                            tempAlert.remove();
+                            window.location.href = '/profile/';
+                        }, 300);
+                    }, 2000);
+                } else {
+                    alert('Gagal membatalkan pesanan: ' + (data.error || 'Unknown error'));
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '<i data-feather="trash-2"></i> Ya, Batalkan';
+                    feather.replace();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat membatalkan pesanan');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i data-feather="trash-2"></i> Ya, Batalkan';
+                feather.replace();
+            });
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const ordersList = document.getElementById('ordersList');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                const status = this.getAttribute('data-status');
+                const newUrl = status === 'all' ? '/profile/' : `/profile/?status=${status}`;
+                window.history.pushState({}, '', newUrl);
+                
+                applyFilter(status);
+            });
+        });
+        
+        function applyFilter(status) {
+            const orderCards = document.querySelectorAll('.order-card');
+            ordersList.classList.add('loading');
+            
+            setTimeout(() => {
+                let hasVisibleOrders = false;
+                
+                orderCards.forEach(card => {
+                    const orderStatus = card.getAttribute('data-order-status');
+                    
+                    if (status === 'all') {
+                        if (orderStatus !== 'cancelled') {
+                            card.style.display = 'block';
+                            hasVisibleOrders = true;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    } else if (orderStatus === status) {
+                        card.style.display = 'block';
+                        hasVisibleOrders = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                ordersList.classList.remove('loading');
+                feather.replace();
+                
+                if (!hasVisibleOrders) {
+                    const existingEmpty = ordersList.querySelector('.empty-orders');
+                    if (!existingEmpty) {
+                        const emptyDiv = document.createElement('div');
+                        emptyDiv.className = 'empty-orders';
+                        emptyDiv.innerHTML = `
+                            <div class="empty-orders-icon">
+                                <i data-feather="inbox"></i>
+                            </div>
+                            <h3>Tidak Ada Pesanan</h3>
+                            <p>Tidak ada pesanan dengan status ini.</p>
+                        `;
+                        ordersList.appendChild(emptyDiv);
+                        feather.replace();
+                    }
+                }
+            }, 200);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let currentFilter = urlParams.get('status') || 'all';
+            applyFilter(currentFilter);
+        });
+    </script>
+</body>
+</html>

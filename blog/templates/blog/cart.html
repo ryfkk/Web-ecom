@@ -5,70 +5,587 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/feather-icons"></script>
-    <link rel="stylesheet" href="{% static 'blog/content.css' %}?v=1.5">
-    <title>Keranjang Belanja - Threeofkind.supply</title>
+    <link rel="stylesheet" href="{% static 'blog/content.css' %}">
+    <title>Keranjang Belanja</title>
+    <style>
+        /* FULL PAGE EMPTY CART */
+        .cart-page.empty-state {
+            min-height: calc(100vh - 140px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .empty-cart-container {
+            text-align: center;
+            padding: 4rem 2rem;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .empty-cart-icon {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(239, 68, 68, 0.2);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .empty-cart-icon svg {
+            width: 80px;
+            height: 80px;
+            color: #ef4444;
+        }
+        
+        .empty-cart-container h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-cart-container p {
+            font-size: 1.15rem;
+            color: #64748b;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+        
+        .empty-cart-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-shop {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-shop:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-shop svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1rem 2.5rem;
+            background: white;
+            color: #1e293b;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border-color: #cbd5e1;
+        }
+        
+        .btn-secondary svg {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
 </head>
 <body>
    <header class="header">
         <div class="header-content">
             <div class="logo">
-                <a href="/">
-                    <img src="{% static 'blog/pict/logo.png'%}?v=1.5" class="logo-image">
-                </a>
+                <a href="/"><img src="{% static 'blog/pict/logo.png'%}" class="logo-image"></a>
             </div>
-            
             <nav class="nav">
-                <a href="/" class="active">Home</a> 
+                <a href="/">Home</a> 
                 <a href="/products/">Product</a>
                 <a href="#">About Us</a>
                 <a href="#">Contact</a>
             </nav>
-            
             <div class="header-right">
                 <a href="/cart/" class="cart-btn">
                     <i data-feather="shopping-cart"></i>
-                    <span class="cart-badge" id="cart-badge-header">0</span> 
+                    <span class="cart-badge" id="cartBadge">0</span> 
                 </a>
-                <a href="#wishlist" class="cart-btn" id="wishlist-btn">
+                <a href="/wishlist/" class="cart-btn">
                     <i data-feather="heart"></i>
+                    <span class="cart-badge" id="wishlist-badge-header" style="display: none;">0</span>
                 </a>
-                <a href="/payment/" class="cart-btn" id="payment-btn">
+                <a href="/payment/" class="cart-btn">
                     <i data-feather="credit-card"></i>
                 </a>
-                
                 {% if request.user.is_authenticated %}
-                    <a href="/logout/" class="cart-btn" id="user-btn" title="Logout">
+                    <a href="/logout/" class="cart-btn">
                         <i data-feather="log-out"></i>
-                        <span style="margin-left: 8px; font-weight: 500;">Hi, {{ request.user.username }}</span>
+                        <span style="margin-left: 8px;">Hi, {{ request.user.username }}</span>
                     </a>
                 {% else %}
-                    <a href="/login/" class="cart-btn" id="user-btn" title="Login/Register">
+                    <a href="/login/" class="cart-btn">
                         <i data-feather="user"></i>
                     </a>
                 {% endif %}
-                </div>
+            </div>
         </div>
     </header>
     
-    <main class="main-content cart-page">
+    <main class="main-content cart-page" id="cartPage">
         <div class="cart-container">
-            <div class="cart-header">
+            <div class="cart-header" id="cartHeader" style="display: none;">
                 <h1>Keranjang Belanja</h1>
             </div>
-
-            <div class="cart-content" id="cart-content">
-                </div>
+            <div id="cartContent"></div>
         </div>
     </main>
 
     {% include 'blog/footer.html' %}
 
-    <script src="{% static 'blog/lund.js' %}?v=1.2"></script>
     <script>
-        // Script khusus untuk halaman cart
-        document.addEventListener('DOMContentLoaded', function() {
-            renderCart();
+        // FORMAT PRICE
+        function formatRupiah(num) {
+            return 'IDR ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // LOAD CART
+        function loadCart() {
+            console.log('🔄 Loading cart...');
+            const data = localStorage.getItem('cart');
+            console.log('📦 Raw data:', data);
+            
+            if (!data) return [];
+            
+            try {
+                const cart = JSON.parse(data);
+                console.log('✅ Parsed cart:', cart);
+                return cart;
+            } catch (e) {
+                console.error('❌ Parse error:', e);
+                return [];
+            }
+        }
+
+        // SAVE CART
+        function saveCart(cart) {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            console.log('💾 Cart saved:', cart);
+            updateBadge();
+            updateWishlistBadge();
+        }
+
+        // UPDATE BADGE
+        function updateBadge() {
+            const cart = loadCart();
+            const total = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = total;
+                badge.style.display = total > 0 ? 'flex' : 'none';
+            }
+        }
+
+        // UPDATE WISHLIST BADGE
+        function updateWishlistBadge() {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+            const badge = document.getElementById('wishlist-badge-header');
+            
+            if (badge) {
+                badge.textContent = wishlist.length;
+                badge.style.display = wishlist.length > 0 ? 'flex' : 'none';
+            }
+        }
+
+        // RENDER CART
+        function renderCart() {
+            console.log('🎨 Rendering cart...');
+            const cart = loadCart();
+            const container = document.getElementById('cartContent');
+            const cartPage = document.getElementById('cartPage');
+            const cartHeader = document.getElementById('cartHeader');
+            
+            if (!container) {
+                console.error('❌ Container not found');
+                return;
+            }
+
+            // EMPTY CART - FULL PAGE
+            if (!cart || cart.length === 0) {
+                console.log('📭 Cart is empty');
+                cartPage.classList.add('empty-state');
+                cartHeader.style.display = 'none';
+                
+                container.innerHTML = `
+                    <div class="empty-cart-container">
+                        <div class="empty-cart-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                        </div>
+                        <h2>Keranjang Anda Kosong</h2>
+                        <p>Sepertinya Anda belum menambahkan produk ke keranjang. Yuk mulai belanja sekarang!</p>
+                        <div class="empty-cart-actions">
+                            <a href="/products/" class="btn-shop">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                                Mulai Belanja
+                            </a>
+                            <a href="/" class="btn-secondary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                                Ke Beranda
+                            </a>
+                        </div>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+
+            // CART WITH ITEMS
+            console.log('🛒 Rendering', cart.length, 'items');
+            cartPage.classList.remove('empty-state');
+            cartHeader.style.display = 'block';
+            
+            let subtotal = 0;
+            let itemsHtml = '';
+            
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                
+                itemsHtml += `
+                    <div class="cart-item">
+                        <div class="cart-item-image">
+                            <img src="${item.image}" alt="${item.name}">
+                        </div>
+                        <div class="cart-item-details">
+                            <h3 class="cart-item-name">${item.name}</h3>
+                            <p class="cart-item-price">${formatRupiah(item.price)}</p>
+                        </div>
+                        <div class="cart-item-actions">
+                            <div class="quantity-selector">
+                                <button onclick="changeQty(${index}, -1)">-</button>
+                                <input type="number" value="${item.quantity}" readonly>
+                                <button onclick="changeQty(${index}, 1)">+</button>
+                            </div>
+                            <button class="remove-btn" onclick="removeItem(${index})">
+                                <i data-feather="trash-2"></i>
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const shipping = 10000;
+            const total = subtotal + shipping;
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            container.innerHTML = `
+                <div class="cart-content">
+                    <div class="cart-items">
+                        ${itemsHtml}
+                    </div>
+                    
+                    <aside class="cart-summary">
+                        <h2>Ringkasan Belanja</h2>
+                        
+                        <div class="promo-code">
+                            <div class="promo-input-group">
+                                <input type="text" placeholder="Kode promo" id="promoInput">
+                                <button onclick="applyPromo()">Terapkan</button>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span>Subtotal (${totalItems} item)</span>
+                            <span>${formatRupiah(subtotal)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Ongkir</span>
+                            <span>${formatRupiah(shipping)}</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span>${formatRupiah(total)}</span>
+                        </div>
+                        
+                        <button class="btn btn-success" onclick="checkout()">
+                            <i data-feather="credit-card"></i>
+                            Lanjut ke Pembayaran
+                        </button>
+                        
+                        <div class="continue-shopping">
+                            <a href="/products/">
+                                <i data-feather="arrow-left"></i>
+                                Lanjut Belanja
+                            </a>
+                        </div>
+                    </aside>
+                </div>
+            `;
+
             feather.replace();
+            updateBadge();
+            updateWishlistBadge();
+        }
+
+        // CHANGE QUANTITY
+        function changeQty(index, change) {
+            console.log('➕➖ Change qty:', index, change);
+            const cart = loadCart();
+            
+            if (cart[index]) {
+                cart[index].quantity += change;
+                
+                if (cart[index].quantity <= 0) {
+                    cart.splice(index, 1);
+                }
+                
+                saveCart(cart);
+                renderCart();
+            }
+        }
+
+        // REMOVE ITEM - CUSTOM MODAL
+        function removeItem(index) {
+            console.log('🗑️ Remove item triggered:', index);
+            const cart = loadCart();
+            const item = cart[index];
+            
+            if (!item) return;
+            
+            const modal = document.createElement('div');
+            modal.id = 'deleteModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(5px);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 20px;
+                    padding: 2rem;
+                    max-width: 400px;
+                    width: 90%;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                    animation: slideUp 0.3s ease;
+                ">
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <div style="
+                            width: 60px;
+                            height: 60px;
+                            background: linear-gradient(135deg, #fee2e2, #fecaca);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin: 0 auto 1rem;
+                        ">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        </div>
+                        <h3 style="
+                            font-size: 1.5rem;
+                            font-weight: 700;
+                            color: #1e293b;
+                            margin-bottom: 0.5rem;
+                        ">Hapus Produk?</h3>
+                        <p style="
+                            color: #64748b;
+                            font-size: 0.95rem;
+                            line-height: 1.5;
+                            margin: 0;
+                        ">${item.name}</p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 0.75rem;">
+                        <button onclick="closeDeleteModal()" style="
+                            flex: 1;
+                            padding: 0.875rem 1.5rem;
+                            border: 2px solid #e2e8f0;
+                            background: white;
+                            color: #64748b;
+                            border-radius: 12px;
+                            font-weight: 600;
+                            font-size: 1rem;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                        ">Batal</button>
+                        
+                        <button onclick="confirmRemove(${index})" style="
+                            flex: 1;
+                            padding: 0.875rem 1.5rem;
+                            border: none;
+                            background: linear-gradient(135deg, #ef4444, #dc2626);
+                            color: white;
+                            border-radius: 12px;
+                            font-weight: 600;
+                            font-size: 1rem;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+                        ">Hapus</button>
+                    </div>
+                </div>
+                
+                <style>
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    @keyframes slideUp {
+                        from { 
+                            opacity: 0;
+                            transform: translateY(20px) scale(0.95);
+                        }
+                        to { 
+                            opacity: 1;
+                            transform: translateY(0) scale(1);
+                        }
+                    }
+                </style>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteModal');
+            if (modal) modal.remove();
+        }
+
+        function confirmRemove(index) {
+            console.log('✅ Confirmed remove:', index);
+            closeDeleteModal();
+            
+            const cart = loadCart();
+            const itemName = cart[index] ? cart[index].name : 'Produk';
+            
+            cart.splice(index, 1);
+            saveCart(cart);
+            renderCart();
+            
+            showSuccessNotification(`${itemName} telah dihapus dari keranjang`);
+        }
+
+        function showSuccessNotification(message) {
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: white;
+                color: #1e293b;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                transform: translateX(120%);
+                transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                font-weight: 500;
+                border-left: 4px solid #10b981;
+            `;
+            
+            notif.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notif);
+            
+            setTimeout(() => notif.style.transform = 'translateX(0)', 100);
+            
+            setTimeout(() => {
+                notif.style.transform = 'translateX(120%)';
+                setTimeout(() => notif.remove(), 400);
+            }, 3000);
+        }
+
+        function applyPromo() {
+            const input = document.getElementById('promoInput');
+            const code = input ? input.value.trim().toUpperCase() : '';
+            
+            if (code === 'DISKON10') {
+                showSuccessNotification('✅ Kode promo berhasil! Diskon 10%');
+            } else if (code === '') {
+                showSuccessNotification('⚠️ Masukkan kode promo');
+            } else {
+                showSuccessNotification('❌ Kode promo tidak valid');
+            }
+        }
+
+        function checkout() {
+            const cart = loadCart();
+            if (cart.length === 0) {
+                alert('Keranjang kosong!');
+                return;
+            }
+            window.location.href = '/payment/';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Cart page loaded');
+            renderCart();
+            updateWishlistBadge();
+            feather.replace();
+            console.log('✅ Initialization complete');
         });
     </script>
 </body>

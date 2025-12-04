@@ -2,13 +2,15 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# GANTI INI dengan SECRET_KEY dari file lama Anda
-SECRET_KEY = 'ganti-dengan-secret-key-anda'
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Application definition
 INSTALLED_APPS = [
     'unfold',
     'unfold.contrib.filters', 
@@ -19,12 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
     'blog.apps.BlogConfig',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -35,7 +32,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -58,6 +54,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -65,6 +62,7 @@ DATABASES = {
     }
 }
 
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -72,53 +70,35 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Jakarta'
 USE_I18N = True
 USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-SITE_ID = 1
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Authentication
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
-        'APP': {
-            'client_id': '59186390403-sp0tu3nug21jtaa7idfidn1knanr6u7i.apps.googleusercontent.com',
-            'secret': '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',
-            'key': ''
-        }
-    }
-}
-
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_USERNAME_REQUIRED = False
-SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
-SOCIALACCOUNT_LOGIN_ON_GET = True
-
-LOGIN_REDIRECT_URL = '/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+# Login/Logout URLs
+LOGIN_REDIRECT_URL = '/profile/'
+LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/login/'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-PASSWORD_RESET_TIMEOUT = 86400
-
+# Messages Framework
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',
@@ -128,7 +108,40 @@ MESSAGE_TAGS = {
     messages.ERROR: 'error',
 }
 
-# MIDTRANS CONFIGURATION
+# ========================================
+# EMAIL CONFIGURATION - GMAIL SMTP
+# ========================================
+
+# Gunakan SMTP Gmail untuk kirim email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# ⚠️ GANTI INI DENGAN EMAIL DAN APP PASSWORD KAMU!
+EMAIL_HOST_USER = 'threeofkind1@gmail.com'  # Email Gmail lo
+EMAIL_HOST_PASSWORD = 'xxxx xxxx xxxx xxxx'  # App Password (16 digit dari Google)
+
+# Email pengirim default
+DEFAULT_FROM_EMAIL = 'Threeofkind.supply <threeofkind1@gmail.com>'
+
+# Admin email (tujuan email dari contact form)
+ADMIN_EMAIL = 'threeofkind1@gmail.com'
+
+# Password Reset Timeout
+PASSWORD_RESET_TIMEOUT = 86400  # 24 hours
+
+# ========================================
+# MIDTRANS PAYMENT GATEWAY CONFIGURATION
+# ========================================
+
+# Mode: False = Sandbox (testing), True = Production (live)
 MIDTRANS_IS_PRODUCTION = False
-MIDTRANS_SERVER_KEY = ''  # GANTI INI
-MIDTRANS_CLIENT_KEY = ''  # GANTI INI
+
+# Sandbox Keys - GANTI DENGAN KEY ANDA!
+MIDTRANS_SERVER_KEY = 'SB-Mid-server-VPyNxUatIo3DowGxudMoEXdS'
+MIDTRANS_CLIENT_KEY = 'SB-Mid-client-wijDPgIztgYcJqCC'
+
+# Production Keys (uncomment dan ganti saat mau go live)
+# MIDTRANS_SERVER_KEY = 'Mid-server-YOUR_PRODUCTION_SERVER_KEY'
+# MIDTRANS_CLIENT_KEY = 'Mid-client-YOUR_PRODUCTION_CLIENT_KEY'

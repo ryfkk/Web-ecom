@@ -16,6 +16,7 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    
     """Model untuk produk/barang"""
     category = models.ForeignKey(
         Category, 
@@ -83,6 +84,15 @@ class Order(models.Model):
         if not self.order_id:
             self.order_id = f"ORD-{uuid.uuid4().hex[:8].upper()}-{timezone.now().strftime('%Y%m%d')}"
         super().save(*args, **kwargs)
+    
+    # 🆕 METHOD BARU - Hitung subtotal produk saja (tanpa ongkir)
+    def get_items_total(self):
+        """Get total of all items without shipping"""
+        from decimal import Decimal
+        total = Decimal('0.00')
+        for item in self.items.all():
+            total += item.get_subtotal()
+        return total
 
 
 class OrderItem(models.Model):
@@ -106,6 +116,7 @@ class Payment(models.Model):
         ('success', 'Success'),
         ('failed', 'Failed'),
         ('expired', 'Expired'),
+        ('cancelled', 'Cancelled'),  # 🆕 TAMBAHAN - untuk support cancel order
     ]
 
     PAYMENT_METHOD_CHOICES = [

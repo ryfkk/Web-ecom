@@ -12,31 +12,49 @@
             <h4>Toko</h4>
             <ul>
                 <li><a href="/">Home</a></li>
-                <li><a href="/products/">Produk</a></li>
-                <li><a href="#">Deals</a></li>
-                <li><a href="#">About</a></li>
+                <li><a href="/#catalog">Produk</a></li>
+                <li><a href="/#about-section">About Us</a></li>
+                <li><a href="/contact/">Contact</a></li>
             </ul>
         </div>
         
         <div class="footer-column help-links">
             <h4>Bantuan</h4>
             <ul>
-                <li><a href="#">FAQ</a></li>
-                <li><a href="#">Cara Pemesanan</a></li>
-                <li><a href="#">Kebijakan Privasi</a></li>
-                <li><a href="#">Syarat & Ketentuan</a></li>
+                <li><a href="#" onclick="alert('FAQ coming soon!'); return false;">FAQ</a></li>
+                <li><a href="#" onclick="alert('Panduan coming soon!'); return false;">Cara Pemesanan</a></li>
+                <li><a href="#" onclick="alert('Privacy Policy coming soon!'); return false;">Kebijakan Privasi</a></li>
+                <li><a href="#" onclick="alert('Terms coming soon!'); return false;">Syarat & Ketentuan</a></li>
             </ul>
         </div>
         
         <div class="footer-column contact">
             <h4>Hubungi Kami</h4>
-            <p><i data-feather="mail"></i> support@threeofkind.id</p>
-            <p><i data-feather="phone"></i> +62 812 3456 7890</p>
+            <p>
+                <i data-feather="mail"></i> 
+                <a href="mailto:threeofkind1@gmail.com" style="color: #94a3b8; text-decoration: none;">
+                    threeofkind1@gmail.com
+                </a>
+            </p>
+            <p>
+                <i data-feather="phone"></i> 
+                <a href="https://wa.me/6282225580700?text=Halo%20Threeofkind.supply%2C%20saya%20mau%20bertanya" target="_blank" style="color: #94a3b8; text-decoration: none;">
+                    +62 822-2558-0700
+                </a>
+            </p>
             <div class="social-icons">
-                <a href="#"><i data-feather="instagram"></i></a>
-                <a href="#"><i data-feather="facebook"></i></a>
-                <a href="#"><i data-feather="twitter"></i></a>
-                <a href="#"><i data-feather="youtube"></i></a>
+                <a href="https://instagram.com/threeofkind.supply" target="_blank" title="Instagram" aria-label="Instagram">
+                    <i data-feather="instagram"></i>
+                </a>
+                <a href="https://facebook.com/threeofkind.supply" target="_blank" title="Facebook" aria-label="Facebook">
+                    <i data-feather="facebook"></i>
+                </a>
+                <a href="https://twitter.com/threeofkind" target="_blank" title="Twitter" aria-label="Twitter">
+                    <i data-feather="twitter"></i>
+                </a>
+                <a href="https://youtube.com/@threeofkindsupply" target="_blank" title="YouTube" aria-label="YouTube">
+                    <i data-feather="youtube"></i>
+                </a>
             </div>
         </div>
         
@@ -45,7 +63,104 @@
     <div class="footer-bottom">
         <p>&copy; {% now "Y" %} Threeofkind.supply. All rights reserved.</p>
         <div class="payment-icons">
-            <span>BCA</span> | <span>Mandiri</span> | <span>GoPay</span> | <span>OVO</span>
+            <span>BCA</span>
+            <span>Mandiri</span>
+            <span>GoPay</span>
+            <span>OVO</span>
+            <span>DANA</span>
+            <span>QRIS</span>
         </div>
     </div>
 </footer>
+
+<style>
+/* Enhanced Footer Styles */
+.footer-column.contact p {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.75rem;
+}
+
+.footer-column.contact p a:hover {
+    color: #ef4444 !important;
+    text-decoration: underline !important;
+}
+
+.social-icons a {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+    background: #ef4444;
+    transform: translateY(-4px) scale(1.1);
+}
+
+.social-icons a::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.social-icons a:hover::after {
+    opacity: 1;
+}
+
+.payment-icons {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.payment-icons span {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    cursor: default;
+    letter-spacing: 0.5px;
+}
+
+.payment-icons span:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-2px);
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.footer-bottom p {
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .payment-icons {
+        justify-content: center;
+    }
+}
+</style>

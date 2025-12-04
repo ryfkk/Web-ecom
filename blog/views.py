@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
@@ -33,7 +34,25 @@ def about_page(request):
 
 
 def contact_page(request):
-    return render(request, 'blog/contact.html')
+    """Contact page with form handling"""
+    context = {}
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+        
+        # Success message
+        context['success'] = f'Terima kasih {name}! Pesan Anda telah terkirim. Kami akan segera menghubungi Anda di {email}.'
+        context['message_sent'] = True
+    
+    return render(request, 'blog/contact.html', context)
+
+
+def wishlist_page(request):
+    """Wishlist page"""
+    return render(request, 'blog/wishlist.html')
 
 
 # ========================================
@@ -190,14 +209,106 @@ def password_reset_confirm_view(request, uidb64, token):
 
 
 # ========================================
-# VIEWS PAYMENT - SIMPLE VERSION!
+# VIEWS PROFILE DASHBOARD
+# ========================================
+
+@login_required
+def profile_dashboard(request):
+    """Dashboard profil user"""
+    status_filter = request.GET.get('status', 'all')
+    
+    if status_filter == 'all':
+        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    else:
+        orders = Order.objects.filter(user=request.user, status=status_filter).order_by('-created_at')
+    
+    total_orders = Order.objects.filter(user=request.user).count()
+    completed_orders = Order.objects.filter(user=request.user, status='delivered').count()
+    pending_orders = Order.objects.filter(user=request.user, status__in=['pending', 'paid', 'processing']).count()
+    
+    context = {
+        'orders': orders,
+        'status_filter': status_filter,
+        'total_orders': total_orders,
+        'completed_orders': completed_orders,
+        'pending_orders': pending_orders,
+    }
+    
+    return render(request, 'blog/profile_dashboard.html', context)
+
+
+@login_required
+def profile_orders(request):
+    """Halaman daftar semua pesanan user"""
+    status_filter = request.GET.get('status', 'all')
+    
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    
+    if status_filter != 'all':
+        orders = orders.filter(status=status_filter)
+    
+    context = {
+        'orders': orders,
+        'status_filter': status_filter,
+    }
+    
+    return render(request, 'blog/profile_orders.html', context)
+
+
+@login_required
+def profile_settings(request):
+    """Halaman pengaturan profil user"""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+        
+        if username != request.user.username:
+            if User.objects.filter(username=username).exists():
+                context = {'error': 'Username sudah digunakan'}
+                return render(request, 'blog/profile_settings.html', context)
+        
+        if email != request.user.email:
+            if User.objects.filter(email=email).exists():
+                context = {'error': 'Email sudah digunakan'}
+                return render(request, 'blog/profile_settings.html', context)
+        
+        request.user.username = username
+        request.user.email = email
+        request.user.first_name = first_name
+        request.user.last_name = last_name
+        request.user.save()
+        
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if new_password:
+            if new_password != confirm_password:
+                context = {'error': 'Password konfirmasi tidak cocok'}
+                return render(request, 'blog/profile_settings.html', context)
+            
+            if len(new_password) < 8:
+                context = {'error': 'Password minimal 8 karakter'}
+                return render(request, 'blog/profile_settings.html', context)
+            
+            request.user.set_password(new_password)
+            request.user.save()
+            from django.contrib.auth import update_session_auth_hash
+            update_session_auth_hash(request, request.user)
+        
+        context = {'success': 'Profil berhasil diupdate'}
+        return render(request, 'blog/profile_settings.html', context)
+    
+    return render(request, 'blog/profile_settings.html')
+
+
+# ========================================
+# VIEWS PAYMENT
 # ========================================
 
 def payment_view(request):
-    """Halaman payment/checkout - SIMPLE VERSION (no session check)"""
-    # Cart akan dibaca dari localStorage di JavaScript
-    # Tidak perlu validasi cart di sini
-    
+    """Halaman payment/checkout"""
     context = {
         'cart_items': [],
         'total': 0,
@@ -211,9 +322,12 @@ def payment_view(request):
 
 
 def process_payment(request):
-    """Process payment - membaca cart dari POST data"""
+    """Process payment - FIXED VERSION"""
     if request.method != 'POST':
         return redirect('/')
+    
+    print("[PROCESS PAYMENT] Starting...")
+    print(f"[PROCESS PAYMENT] POST data: {request.POST}")
     
     # Data customer
     full_name = request.POST.get('full_name')
@@ -223,20 +337,23 @@ def process_payment(request):
     phone = request.POST.get('phone')
     payment_method = request.POST.get('payment_method')
     
-    # Cart data dari form (hidden input yang diisi JavaScript)
+    # Cart data dari form
     cart_json = request.POST.get('cart_data', '{}')
-    
-    print(f"[PROCESS PAYMENT] Received cart_data: {cart_json}")
+    print(f"[PROCESS PAYMENT] Cart JSON: {cart_json}")
     
     if not all([full_name, address, city, postal_code, phone, payment_method]):
+        print("[PROCESS PAYMENT] ERROR: Data tidak lengkap!")
         return JsonResponse({'error': 'Data tidak lengkap'}, status=400)
     
     try:
         cart_data = json.loads(cart_json)
-    except json.JSONDecodeError:
+        print(f"[PROCESS PAYMENT] Cart data parsed: {cart_data}")
+    except json.JSONDecodeError as e:
+        print(f"[PROCESS PAYMENT] ERROR: Invalid JSON - {e}")
         return JsonResponse({'error': 'Invalid cart data'}, status=400)
     
     if not cart_data:
+        print("[PROCESS PAYMENT] ERROR: Cart kosong!")
         return JsonResponse({'error': 'Cart kosong'}, status=400)
     
     # Process cart items
@@ -251,16 +368,25 @@ def process_payment(request):
             if product.stock < quantity:
                 return JsonResponse({'error': f'Stok {product.name} tidak mencukupi'}, status=400)
             
-            subtotal = product.price * quantity
+            price = Decimal(str(item_data.get('price', product.price)))
+            subtotal = price * quantity
             total += subtotal
             
             order_items_data.append({
                 'product': product,
                 'quantity': quantity,
-                'price': product.price
+                'price': price
             })
         except Product.DoesNotExist:
+            print(f"[PROCESS PAYMENT] Product {product_id} not found")
             continue
+    
+    if not order_items_data:
+        return JsonResponse({'error': 'Tidak ada produk valid dalam cart'}, status=400)
+    
+    # Add shipping
+    shipping_cost = Decimal('10000')
+    total_with_shipping = total + shipping_cost
     
     # Create order
     order = Order.objects.create(
@@ -270,10 +396,12 @@ def process_payment(request):
         city=city,
         postal_code=postal_code,
         phone=phone,
-        total_amount=total,
+        total_amount=total_with_shipping,
         payment_method=payment_method,
         status='pending'
     )
+    
+    print(f"[PROCESS PAYMENT] Order created: {order.order_id}")
     
     # Create order items
     for item_data in order_items_data:
@@ -284,35 +412,48 @@ def process_payment(request):
             price=item_data['price']
         )
         
-        # Update stock
         product = item_data['product']
         product.stock -= item_data['quantity']
         product.save()
     
     # Midtrans integration
     snap = midtransclient.Snap(
-        is_production=False,
+        is_production=settings.MIDTRANS_IS_PRODUCTION,
         server_key=settings.MIDTRANS_SERVER_KEY,
         client_key=settings.MIDTRANS_CLIENT_KEY
     )
     
     transaction_details = {
         'order_id': order.order_id,
-        'gross_amount': int(total)
+        'gross_amount': int(total_with_shipping)
     }
     
     item_details = []
     for item in order.items.all():
+        product_name = item.product.name[:50] if len(item.product.name) > 50 else item.product.name
+        
         item_details.append({
-            'id': item.product.id,
+            'id': str(item.product.id),
             'price': int(item.price),
             'quantity': item.quantity,
-            'name': item.product.name
+            'name': product_name
         })
+    
+    item_details.append({
+        'id': 'SHIPPING',
+        'price': int(shipping_cost),
+        'quantity': 1,
+        'name': 'Biaya Pengiriman'
+    })
+    
+    if request.user.is_authenticated and request.user.email:
+        customer_email = request.user.email
+    else:
+        customer_email = 'customer@threeofkind.supply'
     
     customer_details = {
         'first_name': full_name,
-        'email': request.user.email if request.user.is_authenticated else 'customer@example.com',
+        'email': customer_email,
         'phone': phone,
         'billing_address': {
             'address': address,
@@ -347,8 +488,12 @@ def process_payment(request):
         'enabled_payments': enabled_payments
     }
     
+    print(f"[PROCESS PAYMENT] Midtrans param: {json.dumps(param, indent=2)}")
+    
     try:
+        print("[PROCESS PAYMENT] Creating Midtrans transaction...")
         transaction = snap.create_transaction(param)
+        print(f"[PROCESS PAYMENT] SUCCESS! Token: {transaction.get('token')}")
         
         payment = Payment.objects.create(
             order=order,
@@ -356,19 +501,20 @@ def process_payment(request):
             transaction_id=order.order_id,
             snap_token=transaction['token'],
             redirect_url=transaction.get('redirect_url', ''),
-            amount=total,
+            amount=total_with_shipping,
             status='pending',
             bank_choice=request.POST.get('bank_choice') if payment_method == 'bank_transfer' else None,
             ewallet_choice=request.POST.get('ewallet_choice') if payment_method == 'e_wallet' else None
         )
         
-        if payment_method == 'qris':
-            return redirect(f'/order-confirmation/{order.order_id}/?snap_token={transaction["token"]}')
-        else:
-            return redirect(transaction['redirect_url'])
+        print(f"[PROCESS PAYMENT] Redirecting to confirmation...")
+        return redirect('order_confirmation', order_id=order.order_id)
             
     except Exception as e:
-        # Rollback stock
+        print(f"[PROCESS PAYMENT] ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
         for item in order.items.all():
             product = item.product
             product.stock += item.quantity
@@ -454,3 +600,44 @@ def check_payment_status(request, order_id):
         })
     except (Order.DoesNotExist, Payment.DoesNotExist):
         return JsonResponse({'error': 'Order not found'}, status=404)
+
+
+@login_required
+def cancel_order(request, order_id):
+    """Cancel order - only for pending orders"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        order = Order.objects.get(order_id=order_id)
+        
+        if request.user.is_authenticated and order.user != request.user:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        if order.status != 'pending':
+            return JsonResponse({'error': 'Hanya pesanan pending yang bisa dibatalkan'}, status=400)
+        
+        for item in order.items.all():
+            product = item.product
+            product.stock += item.quantity
+            product.save()
+        
+        order.status = 'cancelled'
+        order.save()
+        
+        try:
+            payment = Payment.objects.get(order=order)
+            payment.status = 'cancelled'
+            payment.save()
+        except Payment.DoesNotExist:
+            pass
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Pesanan berhasil dibatalkan'
+        })
+        
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'Order not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
